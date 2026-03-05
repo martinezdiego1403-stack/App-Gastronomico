@@ -1,0 +1,255 @@
+<UserControl x:Class="SandwicheriaWalterio.Views.ReportesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:viewmodels="clr-namespace:SandwicheriaWalterio.ViewModels"
+             xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
+             Background="{DynamicResource BackgroundPrimary}">
+    
+    <UserControl.DataContext>
+        <viewmodels:ReportesViewModel/>
+    </UserControl.DataContext>
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- TÍTULO Y BOTONES -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,20">
+            <TextBlock Text="📊 REPORTES Y ESTADÍSTICAS" FontSize="24" FontWeight="Bold" 
+                       Foreground="{DynamicResource TextPrimary}" VerticalAlignment="Center"/>
+            <Button Command="{Binding ExportarExcelCommand}" Content="📥 Exportar Excel" Margin="30,0,0,0" 
+                    Padding="15,8" FontSize="12" Background="#27AE60" Foreground="White" BorderThickness="0" Cursor="Hand"/>
+            <Button Command="{Binding EnviarEmailCommand}" Content="📧 Enviar Email" Margin="10,0,0,0" 
+                    Padding="15,8" FontSize="12" Background="#3498DB" Foreground="White" BorderThickness="0" Cursor="Hand"/>
+        </StackPanel>
+
+        <!-- FILTROS -->
+        <Border Grid.Row="1" Background="{DynamicResource BackgroundSecondary}" CornerRadius="8" Padding="15" 
+                Margin="0,0,0,15" BorderBrush="{DynamicResource BorderColor}" BorderThickness="1">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Período:" FontSize="13" Foreground="{DynamicResource TextSecondary}" 
+                           VerticalAlignment="Center" Margin="0,0,10,0"/>
+                <ComboBox ItemsSource="{Binding Periodos}" SelectedItem="{Binding PeriodoSeleccionado}" 
+                          Width="150" FontSize="13" Padding="8" Margin="0,0,20,0"/>
+                <TextBlock Text="Desde:" FontSize="13" Foreground="{DynamicResource TextSecondary}" 
+                           VerticalAlignment="Center" Margin="0,0,10,0"/>
+                <DatePicker SelectedDate="{Binding FechaInicio}" Width="130" FontSize="13" Margin="0,0,20,0"/>
+                <TextBlock Text="Hasta:" FontSize="13" Foreground="{DynamicResource TextSecondary}" 
+                           VerticalAlignment="Center" Margin="0,0,10,0"/>
+                <DatePicker SelectedDate="{Binding FechaFin}" Width="130" FontSize="13" Margin="0,0,20,0"/>
+                <Button Command="{Binding ActualizarCommand}" Content="🔄 Actualizar" Padding="15,8" 
+                        FontSize="13" Background="#3498DB" Foreground="White" BorderThickness="0" Cursor="Hand"/>
+            </StackPanel>
+        </Border>
+
+        <!-- CARDS DE RESUMEN -->
+        <Grid Grid.Row="2" Margin="0,0,0,15">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="15"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="15"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="15"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Card: Total Ventas -->
+            <Border Grid.Column="0" Background="{DynamicResource BackgroundSecondary}" CornerRadius="8" Padding="20" 
+                    BorderBrush="{DynamicResource BorderColor}" BorderThickness="1">
+                <StackPanel>
+                    <TextBlock Text="💰 Total Ventas" FontSize="13" Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,10"/>
+                    <TextBlock FontSize="26" FontWeight="Bold" Foreground="#27AE60"
+                               Text="{Binding Resumen.TotalVentas, StringFormat='${0:N0}', Mode=OneWay}"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Card: Cantidad Ventas -->
+            <Border Grid.Column="2" Background="{DynamicResource BackgroundSecondary}" CornerRadius="8" Padding="20" 
+                    BorderBrush="{DynamicResource BorderColor}" BorderThickness="1">
+                <StackPanel>
+                    <TextBlock Text="🧾 Cantidad Ventas" FontSize="13" Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,10"/>
+                    <TextBlock Text="{Binding Resumen.CantidadVentas, Mode=OneWay}" FontSize="26" FontWeight="Bold" Foreground="#3498DB"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Card: Ticket Promedio -->
+            <Border Grid.Column="4" Background="{DynamicResource BackgroundSecondary}" CornerRadius="8" Padding="20" 
+                    BorderBrush="{DynamicResource BorderColor}" BorderThickness="1">
+                <StackPanel>
+                    <TextBlock Text="📈 Ticket Promedio" FontSize="13" Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,10"/>
+                    <TextBlock FontSize="26" FontWeight="Bold" Foreground="#9B59B6"
+                               Text="{Binding Resumen.TicketPromedio, StringFormat='${0:N0}', Mode=OneWay}"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Card: Productos Vendidos -->
+            <Border Grid.Column="6" Background="{DynamicResource BackgroundSecondary}" CornerRadius="8" Padding="20" 
+                    BorderBrush="{DynamicResource BorderColor}" BorderThickness="1">
+                <StackPanel>
+                    <TextBlock Text="📦 Productos Vendidos" FontSize="13" Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,10"/>
+                    <TextBlock Text="{Binding Resumen.CantidadProductosVendidos, Mode=OneWay}" FontSize="26" FontWeight="Bold" Foreground="#E67E22"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- PESTAÑAS CON CONTENIDO -->
+        <TabControl Grid.Row="3" SelectedIndex="{Binding TabSeleccionado}" Background="Transparent" BorderThickness="0">
+            
+            <!-- PESTAÑA 1: Dashboard -->
+            <TabItem Header="📊 Dashboard">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,15,0,0">
+                    <StackPanel>
+                        <!-- Gráfico de ventas por día -->
+                        <Border Background="{DynamicResource BackgroundSecondary}" CornerRadius="8" Padding="20" 
+                                Margin="0,0,0,15" BorderBrush="{DynamicResource BorderColor}" BorderThickness="1">
+                            <StackPanel>
+                                <TextBlock Text="📈 VENTAS POR DÍA" FontSize="16" FontWeight="Bold" 
+                                           Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,15"/>
+                                <lvc:CartesianChart Series="{Binding SeriesVentasPorDia}" XAxes="{Binding EjesX}" 
+                                                    YAxes="{Binding EjesY}" Height="250" LegendPosition="Top"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Grid para Top Productos y Métodos de Pago -->
+                        <Grid Margin="0,0,0,15">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="15"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Top 10 Productos -->
+                            <Border Grid.Column="0" Background="{DynamicResource BackgroundSecondary}" CornerRadius="8" 
+                                    Padding="20" BorderBrush="{DynamicResource BorderColor}" BorderThickness="1">
+                                <StackPanel>
+                                    <TextBlock Text="🏆 TOP 10 PRODUCTOS" FontSize="16" FontWeight="Bold" 
+                                               Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,15"/>
+                                    <ItemsControl ItemsSource="{Binding TopProductos}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Background="{DynamicResource BackgroundTertiary}" CornerRadius="5" 
+                                                        Padding="12" Margin="0,0,0,8">
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <Border Grid.Column="0" Background="#3498DB" CornerRadius="3" 
+                                                                Width="30" Height="30" Margin="0,0,10,0">
+                                                            <TextBlock Text="{Binding CantidadVendida}" Foreground="White" 
+                                                                       FontWeight="Bold" FontSize="12" HorizontalAlignment="Center" 
+                                                                       VerticalAlignment="Center"/>
+                                                        </Border>
+                                                        <TextBlock Grid.Column="1" Text="{Binding NombreProducto}" FontSize="13" 
+                                                                   VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
+                                                                   Foreground="{DynamicResource TextPrimary}"/>
+                                                        <TextBlock Grid.Column="2" FontSize="13" FontWeight="Bold" 
+                                                                   Foreground="#27AE60" VerticalAlignment="Center"
+                                                                   Text="{Binding TotalVentas, StringFormat='${0:N0}'}"/>
+                                                    </Grid>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Métodos de Pago -->
+                            <Border Grid.Column="2" Background="{DynamicResource BackgroundSecondary}" CornerRadius="8" 
+                                    Padding="20" BorderBrush="{DynamicResource BorderColor}" BorderThickness="1">
+                                <StackPanel>
+                                    <TextBlock Text="💳 MÉTODOS DE PAGO" FontSize="16" FontWeight="Bold" 
+                                               Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,15"/>
+                                    <lvc:PieChart Series="{Binding SeriesMetodosPago}" Height="280" LegendPosition="Bottom"/>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- PESTAÑA 2: Análisis -->
+            <TabItem Header="📈 Análisis">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,15,0,0">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="15"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Ventas por Hora -->
+                        <Border Grid.Column="0" Background="{DynamicResource BackgroundSecondary}" CornerRadius="8" 
+                                Padding="20" BorderBrush="{DynamicResource BorderColor}" BorderThickness="1">
+                            <StackPanel>
+                                <TextBlock Text="🕐 VENTAS POR HORA" FontSize="16" FontWeight="Bold" 
+                                           Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,15"/>
+                                <TextBlock Text="Identifica tus horas pico" FontSize="12" 
+                                           Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,15"/>
+                                <lvc:CartesianChart Series="{Binding SeriesVentasPorHora}" XAxes="{Binding EjesXHora}" 
+                                                    YAxes="{Binding EjesYHora}" Height="300"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Ventas por Categoría -->
+                        <Border Grid.Column="2" Background="{DynamicResource BackgroundSecondary}" CornerRadius="8" 
+                                Padding="20" BorderBrush="{DynamicResource BorderColor}" BorderThickness="1">
+                            <StackPanel>
+                                <TextBlock Text="📂 VENTAS POR CATEGORÍA" FontSize="16" FontWeight="Bold" 
+                                           Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,15"/>
+                                <TextBlock Text="¿Qué tipo de productos se venden más?" FontSize="12" 
+                                           Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,15"/>
+                                <lvc:PieChart Series="{Binding SeriesCategorias}" Height="300" LegendPosition="Bottom"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- PESTAÑA 3: Historial de Cajas -->
+            <TabItem Header="🗃️ Historial Cajas">
+                <Grid Margin="0,15,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Encabezado -->
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,15">
+                        <TextBlock Text="📋 Historial de Cajas Cerradas" FontSize="18" FontWeight="Bold" 
+                                   Foreground="{DynamicResource TextPrimary}" VerticalAlignment="Center"/>
+                        <Button Command="{Binding ExportarHistorialCommand}" Content="📥 Exportar" Margin="20,0,0,0" 
+                                Padding="12,6" Background="#27AE60" Foreground="White" BorderThickness="0" Cursor="Hand"/>
+                    </StackPanel>
+
+                    <!-- DataGrid con historial -->
+                    <Border Grid.Row="1" Background="{DynamicResource BackgroundSecondary}" CornerRadius="8" Padding="15" 
+                            BorderBrush="{DynamicResource BorderColor}" BorderThickness="1">
+                        <DataGrid ItemsSource="{Binding HistorialCajas}" AutoGenerateColumns="False" IsReadOnly="True" 
+                                  CanUserAddRows="False" GridLinesVisibility="Horizontal" HeadersVisibility="Column" 
+                                  BorderThickness="0" Background="Transparent">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="ID" Binding="{Binding CajaID}" Width="50"/>
+                                <DataGridTextColumn Header="Apertura" Binding="{Binding FechaAperturaDisplay}" Width="130"/>
+                                <DataGridTextColumn Header="Cierre" Binding="{Binding FechaCierreDisplay}" Width="130"/>
+                                <DataGridTextColumn Header="Usuario" Binding="{Binding Usuario}" Width="120"/>
+                                <DataGridTextColumn Header="Monto Inicial" Binding="{Binding MontoInicial, StringFormat=C2}" Width="100"/>
+                                <DataGridTextColumn Header="Total Ventas" Binding="{Binding TotalVentas, StringFormat=C2}" Width="100"/>
+                                <DataGridTextColumn Header="Monto Final" Binding="{Binding MontoFinal, StringFormat=C2}" Width="100"/>
+                                <DataGridTextColumn Header="Diferencia" Binding="{Binding Diferencia, StringFormat=C2}" Width="90"/>
+                                <DataGridTextColumn Header="Ventas" Binding="{Binding CantidadVentas}" Width="60"/>
+                                <DataGridTextColumn Header="Estado" Binding="{Binding Estado}" Width="80"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Border>
+                </Grid>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</UserControl>

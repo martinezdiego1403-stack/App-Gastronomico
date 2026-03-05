@@ -1,0 +1,36 @@
+<Application x:Class="SandwicheriaWalterio.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:helpers="clr-namespace:SandwicheriaWalterio.Helpers"
+             StartupUri="Views/LoginWindow.xaml">
+    
+    <Application.Resources>
+        <ResourceDictionary>
+            <!-- Converters -->
+            <helpers:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
+            <helpers:NullToVisibilityInverseConverter x:Key="NullToVisibilityInverseConverter"/>
+            <helpers:BoolToActivarDesactivarConverter x:Key="BoolToActivarDesactivarConverter"/>
+            <helpers:BoolToColorConverter x:Key="BoolToColorConverter"/>
+            <helpers:RadioButtonConverter x:Key="RadioButtonConverter"/>
+
+            <!-- Colores base (tema claro por defecto) -->
+            <SolidColorBrush x:Key="BackgroundPrimary" Color="#ECF0F1"/>
+            <SolidColorBrush x:Key="BackgroundSecondary" Color="#FFFFFF"/>
+            <SolidColorBrush x:Key="BackgroundTertiary" Color="#F8F9FA"/>
+            <SolidColorBrush x:Key="BackgroundCard" Color="#FFFFFF"/>
+            <SolidColorBrush x:Key="TextPrimary" Color="#2C3E50"/>
+            <SolidColorBrush x:Key="TextSecondary" Color="#7F8C8D"/>
+            <SolidColorBrush x:Key="TextMuted" Color="#BDC3C7"/>
+            <SolidColorBrush x:Key="BorderColor" Color="#BDC3C7"/>
+            <SolidColorBrush x:Key="SidebarBackground" Color="#FFFFFF"/>
+            <SolidColorBrush x:Key="HeaderBackground" Color="#2C3E50"/>
+
+            <!-- Colores de acento -->
+            <SolidColorBrush x:Key="AccentPrimary" Color="#3498DB"/>
+            <SolidColorBrush x:Key="AccentSuccess" Color="#27AE60"/>
+            <SolidColorBrush x:Key="AccentWarning" Color="#F39C12"/>
+            <SolidColorBrush x:Key="AccentDanger" Color="#E74C3C"/>
+            <SolidColorBrush x:Key="AccentPurple" Color="#9B59B6"/>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

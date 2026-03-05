@@ -1,0 +1,385 @@
+<Window x:Class="SandwicheriaWalterio.Views.RecetaFormWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
+        Title="Receta" 
+        Width="700" Height="680"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        Background="#1a1a2e">
+
+    <Window.Resources>
+        <!-- Estilo para TextBox oscuro -->
+        <Style x:Key="DarkTextBox" TargetType="TextBox">
+            <Setter Property="Background" Value="#16213e"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#0f3460"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="10,8"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="CaretBrush" Value="White"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}" 
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="5">
+                            <ScrollViewer x:Name="PART_ContentHost" Margin="2"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Estilo para ComboBoxItem oscuro -->
+        <Style x:Key="DarkComboBoxItem" TargetType="ComboBoxItem">
+            <Setter Property="Background" Value="#16213e"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Padding" Value="10,8"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBoxItem">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" 
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#0f3460"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#27AE60"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Estilo completo para ComboBox oscuro -->
+        <Style x:Key="DarkComboBox" TargetType="ComboBox">
+            <Setter Property="Background" Value="#16213e"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#0f3460"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="10,8"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="ItemContainerStyle" Value="{StaticResource DarkComboBoxItem}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <ToggleButton x:Name="ToggleButton" 
+                                          Background="{TemplateBinding Background}"
+                                          BorderBrush="{TemplateBinding BorderBrush}"
+                                          BorderThickness="1"
+                                          Focusable="False"
+                                          IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                          ClickMode="Press">
+                                <ToggleButton.Template>
+                                    <ControlTemplate TargetType="ToggleButton">
+                                        <Border Background="{TemplateBinding Background}" 
+                                                BorderBrush="{TemplateBinding BorderBrush}"
+                                                BorderThickness="{TemplateBinding BorderThickness}"
+                                                CornerRadius="5">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="30"/>
+                                                </Grid.ColumnDefinitions>
+                                                <ContentPresenter Grid.Column="0"/>
+                                                <Path Grid.Column="1" Data="M0,0 L4,4 L8,0" 
+                                                      Fill="White" HorizontalAlignment="Center" 
+                                                      VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                            </Grid>
+                                        </Border>
+                                    </ControlTemplate>
+                                </ToggleButton.Template>
+                            </ToggleButton>
+                            <ContentPresenter x:Name="ContentSite"
+                                              Content="{TemplateBinding SelectionBoxItem}"
+                                              ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                              Margin="12,8,30,8"
+                                              VerticalAlignment="Center"
+                                              HorizontalAlignment="Left"
+                                              IsHitTestVisible="False"/>
+                            <Popup x:Name="Popup" Placement="Bottom" 
+                                   IsOpen="{TemplateBinding IsDropDownOpen}"
+                                   AllowsTransparency="True" Focusable="False"
+                                   PopupAnimation="Slide">
+                                <Border x:Name="DropDown" 
+                                        Background="#16213e" 
+                                        BorderBrush="#0f3460" 
+                                        BorderThickness="1"
+                                        CornerRadius="5"
+                                        MinWidth="{TemplateBinding ActualWidth}"
+                                        MaxHeight="{TemplateBinding MaxDropDownHeight}">
+                                    <ScrollViewer Margin="4" SnapsToDevicePixels="True">
+                                        <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained"/>
+                                    </ScrollViewer>
+                                </Border>
+                            </Popup>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+    <Grid Margin="25">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- TÍTULO -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,20">
+            <TextBlock x:Name="txtTitulo" Text="🍕 NUEVA RECETA" 
+                       FontSize="24" FontWeight="Bold" Foreground="White"/>
+            <TextBlock Text="Configura los ingredientes de mercadería para esta receta"
+                       FontSize="12" Foreground="#a0a0a0" Margin="0,5,0,0"/>
+        </StackPanel>
+
+        <!-- DATOS BÁSICOS -->
+        <Border Grid.Row="1" Background="#16213e" CornerRadius="10" Padding="20" Margin="0,0,0,15">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Nombre -->
+                <StackPanel Grid.Column="0" Grid.Row="0" Margin="0,0,0,15">
+                    <TextBlock Text="Nombre de la receta *" FontWeight="SemiBold" 
+                               Foreground="#e0e0e0" Margin="0,0,0,8"/>
+                    <TextBox x:Name="txtNombre" Height="42" Style="{StaticResource DarkTextBox}"/>
+                </StackPanel>
+
+                <!-- Precio -->
+                <StackPanel Grid.Column="2" Grid.Row="0" Margin="0,0,0,15">
+                    <TextBlock Text="Precio de venta *" FontWeight="SemiBold"
+                               Foreground="#e0e0e0" Margin="0,0,0,8"/>
+                    <TextBox x:Name="txtPrecio" Height="42" Style="{StaticResource DarkTextBox}"/>
+                </StackPanel>
+
+                <!-- Categoría -->
+                <StackPanel Grid.Column="0" Grid.Row="1" Margin="0,0,0,15">
+                    <TextBlock Text="Categoría *" FontWeight="SemiBold"
+                               Foreground="#e0e0e0" Margin="0,0,0,8"/>
+                    <ComboBox x:Name="cboCategoria" Height="42" Style="{StaticResource DarkComboBox}"/>
+                </StackPanel>
+
+                <!-- Stock Actual -->
+                <StackPanel Grid.Column="2" Grid.Row="1" Margin="0,0,0,15">
+                    <TextBlock Text="Stock actual *" FontWeight="SemiBold"
+                               Foreground="#e0e0e0" Margin="0,0,0,8"/>
+                    <TextBox x:Name="txtStock" Height="42" Style="{StaticResource DarkTextBox}" Text="0"/>
+                </StackPanel>
+
+                <!-- Stock Mínimo -->
+                <StackPanel Grid.Column="0" Grid.Row="2" Margin="0,0,0,15">
+                    <TextBlock Text="Stock mínimo (alerta)" FontWeight="SemiBold"
+                               Foreground="#e0e0e0" Margin="0,0,0,8"/>
+                    <TextBox x:Name="txtStockMinimo" Height="42" Style="{StaticResource DarkTextBox}" Text="5"/>
+                </StackPanel>
+
+                <!-- Código de barras -->
+                <StackPanel Grid.Column="2" Grid.Row="2" Margin="0,0,0,15">
+                    <TextBlock Text="Código de barras (opcional)" FontWeight="SemiBold"
+                               Foreground="#e0e0e0" Margin="0,0,0,8"/>
+                    <TextBox x:Name="txtCodigoBarras" Height="42" Style="{StaticResource DarkTextBox}"/>
+                </StackPanel>
+
+                <!-- Descripción -->
+                <StackPanel Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="3">
+                    <TextBlock Text="Descripción (opcional)" FontWeight="SemiBold"
+                               Foreground="#e0e0e0" Margin="0,0,0,8"/>
+                    <TextBox x:Name="txtDescripcion" Height="50" Style="{StaticResource DarkTextBox}"
+                             TextWrapping="Wrap" AcceptsReturn="False"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- INGREDIENTES -->
+        <Border Grid.Row="2" Background="#16213e" CornerRadius="10" Padding="20">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Título sección ingredientes -->
+                <TextBlock Grid.Row="0" Text="📦 INGREDIENTES DE MERCADERÍA" 
+                           FontSize="14" FontWeight="Bold" Foreground="White" Margin="0,0,0,15"/>
+
+                <!-- Agregar ingrediente -->
+                <Grid Grid.Row="1" Margin="0,0,0,15">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="90"/>
+                        <ColumnDefinition Width="90"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <ComboBox x:Name="cboProductoMercaderia" Grid.Column="0" 
+                              Height="40" Margin="0,0,10,0" Style="{StaticResource DarkComboBox}"/>
+
+                    <TextBox x:Name="txtCantidad" Grid.Column="1" 
+                             Height="40" Margin="0,0,10,0" Text="1"
+                             Style="{StaticResource DarkTextBox}" TextAlignment="Center"/>
+
+                    <ComboBox x:Name="cboUnidad" Grid.Column="2" 
+                              Height="40" Margin="0,0,10,0" Style="{StaticResource DarkComboBox}">
+                        <ComboBoxItem Content="Unidad" IsSelected="True"/>
+                        <ComboBoxItem Content="Gramo"/>
+                        <ComboBoxItem Content="Kg"/>
+                        <ComboBoxItem Content="Miligramo"/>
+                        <ComboBoxItem Content="Litro"/>
+                        <ComboBoxItem Content="Mililitro"/>
+                    </ComboBox>
+
+                    <Button x:Name="btnAgregarIngrediente" Grid.Column="3" 
+                            Click="BtnAgregarIngrediente_Click"
+                            Background="#27AE60" Foreground="White" Height="40"
+                            Padding="15,0" BorderThickness="0" Cursor="Hand">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="{TemplateBinding Background}" CornerRadius="5">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                            </ControlTemplate>
+                        </Button.Template>
+                        <StackPanel Orientation="Horizontal">
+                            <fa:IconImage Icon="Plus" Width="12" Height="12" Foreground="White"/>
+                            <TextBlock Text="Agregar" Margin="8,0,0,0" FontSize="12" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                </Grid>
+
+                <!-- Lista de ingredientes con scroll -->
+                <Border Grid.Row="2" Background="#0f3460" CornerRadius="8" Padding="10" 
+                        MinHeight="120" MaxHeight="200">
+                    <Grid>
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" 
+                                      HorizontalScrollBarVisibility="Disabled">
+                            <ListView x:Name="lvIngredientes" Background="Transparent" 
+                                      BorderThickness="0" Foreground="White"
+                                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                      ScrollViewer.VerticalScrollBarVisibility="Disabled">
+                                <ListView.ItemContainerStyle>
+                                    <Style TargetType="ListViewItem">
+                                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                        <Setter Property="Padding" Value="8"/>
+                                        <Setter Property="Margin" Value="0,2"/>
+                                        <Setter Property="Background" Value="Transparent"/>
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="ListViewItem">
+                                                    <Border Background="#1a1a2e" CornerRadius="5" Padding="10" Margin="0,2">
+                                                        <ContentPresenter/>
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </ListView.ItemContainerStyle>
+                                <ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="80"/>
+                                                <ColumnDefinition Width="70"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <TextBlock Grid.Column="0" Text="{Binding ProductoNombre}" 
+                                                       VerticalAlignment="Center" FontSize="13"
+                                                       Foreground="White"/>
+                                            
+                                            <TextBlock Grid.Column="1" 
+                                                       Text="{Binding Cantidad, StringFormat='{}{0:N2}'}"
+                                                       VerticalAlignment="Center" TextAlignment="Center"
+                                                       Foreground="#27AE60" FontWeight="Bold"/>
+                                            
+                                            <TextBlock Grid.Column="2" Text="{Binding UnidadMedida}"
+                                                       VerticalAlignment="Center" TextAlignment="Center"
+                                                       Foreground="#a0a0a0" FontSize="12"/>
+
+                                            <Button Grid.Column="3" Click="BtnQuitarIngrediente_Click"
+                                                    Tag="{Binding}" Width="30" Height="30"
+                                                    Background="#E74C3C" BorderThickness="0" Cursor="Hand"
+                                                    ToolTip="Quitar ingrediente">
+                                                <Button.Template>
+                                                    <ControlTemplate TargetType="Button">
+                                                        <Border Background="{TemplateBinding Background}" CornerRadius="5">
+                                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                        </Border>
+                                                    </ControlTemplate>
+                                                </Button.Template>
+                                                <fa:IconImage Icon="Times" Width="10" Height="10" Foreground="White"/>
+                                            </Button>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+                        </ScrollViewer>
+
+                        <!-- Mensaje sin ingredientes -->
+                        <TextBlock x:Name="txtSinIngredientes" 
+                                   Text="Agrega ingredientes de mercadería para esta receta"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                                   Foreground="#606060" FontStyle="Italic" FontSize="13"/>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Border>
+
+        <!-- BOTONES -->
+        <StackPanel Grid.Row="3" Orientation="Horizontal" 
+                    HorizontalAlignment="Right" Margin="0,20,0,0">
+            <Button x:Name="btnCancelar" Content="Cancelar" Click="BtnCancelar_Click"
+                    Width="120" Height="45" FontSize="14"
+                    Background="#2d2d44" Foreground="White"
+                    BorderThickness="0" Cursor="Hand" Margin="0,0,10,0">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="5">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+            
+            <Button x:Name="btnGuardar" Click="BtnGuardar_Click"
+                    Width="170" Height="45" FontSize="14" FontWeight="SemiBold"
+                    Background="#27AE60" Foreground="White"
+                    BorderThickness="0" Cursor="Hand">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="5">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Button.Template>
+                <StackPanel Orientation="Horizontal">
+                    <fa:IconImage Icon="Save" Width="14" Height="14" Foreground="White"/>
+                    <TextBlock Text="Guardar Receta" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Button>
+        </StackPanel>
+    </Grid>
+    </ScrollViewer>
+</Window>

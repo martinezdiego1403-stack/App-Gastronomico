@@ -1,0 +1,333 @@
+<UserControl x:Class="SandwicheriaWalterio.Views.UsuariosView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:viewmodels="clr-namespace:SandwicheriaWalterio.ViewModels"
+             Background="{DynamicResource BackgroundPrimary}">
+    
+    <UserControl.DataContext>
+        <viewmodels:UsuariosViewModel/>
+    </UserControl.DataContext>
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- TÍTULO Y BOTONES -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,20">
+            <TextBlock Text="👥 GESTIÓN DE USUARIOS" FontSize="24" FontWeight="Bold" 
+                       Foreground="{DynamicResource TextPrimary}" VerticalAlignment="Center"/>
+            <Button Command="{Binding NuevoUsuarioCommand}" Content="➕ Nuevo Usuario" Margin="30,0,0,0" 
+                    Padding="15,8" FontSize="12" Background="#27AE60" Foreground="White" BorderThickness="0" Cursor="Hand"/>
+            <Button Command="{Binding ActualizarCommand}" Content="🔄 Actualizar" Margin="10,0,0,0" 
+                    Padding="15,8" FontSize="12" Background="#3498DB" Foreground="White" BorderThickness="0" Cursor="Hand"/>
+        </StackPanel>
+
+        <!-- ESTADÍSTICAS -->
+        <Grid Grid.Row="1" Margin="0,0,0,15">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="15"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="15"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Background="{DynamicResource BackgroundSecondary}" CornerRadius="8" Padding="15" 
+                    BorderBrush="{DynamicResource BorderColor}" BorderThickness="1">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="👥" FontSize="24" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <StackPanel>
+                        <TextBlock Text="Total Usuarios" FontSize="11" Foreground="{DynamicResource TextSecondary}"/>
+                        <TextBlock Text="{Binding TotalUsuarios}" FontSize="20" FontWeight="Bold" 
+                                   Foreground="{DynamicResource TextPrimary}"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Column="2" Background="{DynamicResource BackgroundSecondary}" CornerRadius="8" Padding="15" 
+                    BorderBrush="{DynamicResource BorderColor}" BorderThickness="1">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="✅" FontSize="24" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <StackPanel>
+                        <TextBlock Text="Activos" FontSize="11" Foreground="{DynamicResource TextSecondary}"/>
+                        <TextBlock Text="{Binding UsuariosActivos}" FontSize="20" FontWeight="Bold" Foreground="#27AE60"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Column="4" Background="{DynamicResource BackgroundSecondary}" CornerRadius="8" Padding="15" 
+                    BorderBrush="{DynamicResource BorderColor}" BorderThickness="1">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="❌" FontSize="24" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <StackPanel>
+                        <TextBlock Text="Inactivos" FontSize="11" Foreground="{DynamicResource TextSecondary}"/>
+                        <TextBlock Text="{Binding UsuariosInactivos}" FontSize="20" FontWeight="Bold" Foreground="#E74C3C"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- FILTROS -->
+        <Border Grid.Row="2" Background="{DynamicResource BackgroundSecondary}" CornerRadius="8" Padding="15" 
+                Margin="0,0,0,15" BorderBrush="{DynamicResource BorderColor}" BorderThickness="1">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="🔍 Buscar:" FontSize="13" Foreground="{DynamicResource TextSecondary}" 
+                           VerticalAlignment="Center" Margin="0,0,10,0"/>
+                <TextBox Text="{Binding Filtro, UpdateSourceTrigger=PropertyChanged}" Width="250" Padding="10,8" FontSize="13"/>
+                <CheckBox IsChecked="{Binding MostrarSoloActivos}" Content="Mostrar solo activos" Margin="30,0,0,0" 
+                          VerticalAlignment="Center" FontSize="13" Foreground="{DynamicResource TextPrimary}"/>
+            </StackPanel>
+        </Border>
+
+        <!-- CONTENIDO PRINCIPAL CON PESTAÑAS -->
+        <TabControl Grid.Row="3" Background="Transparent" BorderThickness="0">
+            
+            <!-- PESTAÑA: Lista de Usuarios -->
+            <TabItem Header="📋 Lista de Usuarios">
+                <Grid Margin="0,15,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="300"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- DataGrid de usuarios -->
+                    <Border Grid.Column="0" Background="{DynamicResource BackgroundSecondary}" CornerRadius="8" Padding="15" 
+                            Margin="0,0,15,0" BorderBrush="{DynamicResource BorderColor}" BorderThickness="1">
+                        <DataGrid ItemsSource="{Binding Usuarios}" 
+                                  SelectedItem="{Binding UsuarioSeleccionado}"
+                                  AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False"
+                                  GridLinesVisibility="Horizontal" HeadersVisibility="Column"
+                                  BorderThickness="0" Background="Transparent" SelectionMode="Single">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="ID" Binding="{Binding UsuarioID}" Width="50"/>
+                                <DataGridTextColumn Header="Usuario" Binding="{Binding NombreUsuario}" Width="100"/>
+                                <DataGridTextColumn Header="Nombre Completo" Binding="{Binding NombreCompleto}" Width="*"/>
+                                <DataGridTextColumn Header="Rol" Binding="{Binding RolDisplay}" Width="80"/>
+                                <DataGridTextColumn Header="Estado" Binding="{Binding EstadoDisplay}" Width="70"/>
+                                <DataGridTemplateColumn Header="Acciones" Width="100">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                                <Button Content="✏️" Width="32" Height="28" Margin="0,0,5,0"
+                                                        Background="#3498DB" Foreground="White" BorderThickness="0" 
+                                                        Cursor="Hand" ToolTip="Editar usuario"
+                                                        Command="{Binding DataContext.EditarUsuarioCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                        CommandParameter="{Binding}"/>
+                                                <Button Content="🗑️" Width="32" Height="28"
+                                                        Background="#E74C3C" Foreground="White" BorderThickness="0" 
+                                                        Cursor="Hand" ToolTip="Eliminar usuario"
+                                                        Command="{Binding DataContext.EliminarUsuarioCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                        CommandParameter="{Binding}"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Border>
+
+                    <!-- Panel de detalles y acciones -->
+                    <Border Grid.Column="1" Background="{DynamicResource BackgroundSecondary}" CornerRadius="8" Padding="15" 
+                            BorderBrush="{DynamicResource BorderColor}" BorderThickness="1">
+                        <StackPanel>
+                            <TextBlock Text="📝 DETALLES DEL USUARIO" FontWeight="Bold" 
+                                       Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,15"/>
+
+                            <!-- Información del usuario seleccionado -->
+                            <StackPanel Visibility="{Binding UsuarioSeleccionado, Converter={StaticResource NullToVisibilityConverter}, FallbackValue=Collapsed}">
+                                
+                                <Border Background="{DynamicResource BackgroundTertiary}" CornerRadius="5" Padding="10" Margin="0,0,0,10">
+                                    <StackPanel>
+                                        <TextBlock Text="Usuario:" FontSize="11" Foreground="{DynamicResource TextSecondary}"/>
+                                        <TextBlock Text="{Binding UsuarioSeleccionado.NombreUsuario}" FontSize="14" FontWeight="Bold" 
+                                                   Foreground="{DynamicResource TextPrimary}"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Background="{DynamicResource BackgroundTertiary}" CornerRadius="5" Padding="10" Margin="0,0,0,10">
+                                    <StackPanel>
+                                        <TextBlock Text="Nombre Completo:" FontSize="11" Foreground="{DynamicResource TextSecondary}"/>
+                                        <TextBlock Text="{Binding UsuarioSeleccionado.NombreCompleto}" FontSize="14" FontWeight="Bold" 
+                                                   Foreground="{DynamicResource TextPrimary}"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Background="{DynamicResource BackgroundTertiary}" CornerRadius="5" Padding="10" Margin="0,0,0,10">
+                                    <StackPanel>
+                                        <TextBlock Text="Email:" FontSize="11" Foreground="{DynamicResource TextSecondary}"/>
+                                        <TextBlock Text="{Binding UsuarioSeleccionado.Email, TargetNullValue='No especificado'}" FontSize="14" 
+                                                   Foreground="{DynamicResource TextPrimary}"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Background="{DynamicResource BackgroundTertiary}" CornerRadius="5" Padding="10" Margin="0,0,0,10">
+                                    <StackPanel>
+                                        <TextBlock Text="Rol:" FontSize="11" Foreground="{DynamicResource TextSecondary}"/>
+                                        <TextBlock Text="{Binding UsuarioSeleccionado.RolDisplay}" FontSize="14" FontWeight="Bold" 
+                                                   Foreground="{DynamicResource TextPrimary}"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Background="{DynamicResource BackgroundTertiary}" CornerRadius="5" Padding="10" Margin="0,0,0,15">
+                                    <StackPanel>
+                                        <TextBlock Text="Creado:" FontSize="11" Foreground="{DynamicResource TextSecondary}"/>
+                                        <TextBlock Text="{Binding UsuarioSeleccionado.FechaCreacion, StringFormat='{}{0:dd/MM/yyyy}'}" 
+                                                   FontSize="14" Foreground="{DynamicResource TextPrimary}"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Botones de acción -->
+                                <TextBlock Text="ACCIONES" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,10"/>
+                                
+                                <Button Command="{Binding EditarUsuarioCommand}" Content="✏️ Editar Usuario" 
+                                        Padding="10,8" Margin="0,0,0,8" Background="#3498DB" Foreground="White" 
+                                        BorderThickness="0" Cursor="Hand" HorizontalAlignment="Stretch"/>
+                                
+                                <Button Command="{Binding CambiarContraseñaCommand}" Content="🔑 Cambiar Contraseña" 
+                                        Padding="10,8" Margin="0,0,0,8" Background="#9B59B6" Foreground="White" 
+                                        BorderThickness="0" Cursor="Hand" HorizontalAlignment="Stretch"/>
+                                
+                                <Button Command="{Binding CambiarEstadoCommand}" 
+                                        Content="{Binding UsuarioSeleccionado.Activo, Converter={StaticResource BoolToActivarDesactivarConverter}, FallbackValue='⚡ Cambiar Estado'}" 
+                                        Padding="10,8" Margin="0,0,0,8" Background="#E67E22" Foreground="White" 
+                                        BorderThickness="0" Cursor="Hand" HorizontalAlignment="Stretch"/>
+                                
+                                <Button Command="{Binding DesbloquearCommand}" Content="🔓 Desbloquear" 
+                                        Padding="10,8" Margin="0,0,0,8" Background="#27AE60" Foreground="White" 
+                                        BorderThickness="0" Cursor="Hand" HorizontalAlignment="Stretch"/>
+
+                                <Button Command="{Binding EliminarUsuarioCommand}" Content="🗑️ Eliminar Usuario" 
+                                        Padding="10,8" Background="#E74C3C" Foreground="White" 
+                                        BorderThickness="0" Cursor="Hand" HorizontalAlignment="Stretch"/>
+                            </StackPanel>
+
+                            <!-- Mensaje cuando no hay usuario seleccionado -->
+                            <TextBlock Text="Seleccione un usuario de la lista para ver sus detalles"
+                                       Foreground="{DynamicResource TextSecondary}" FontStyle="Italic" TextWrapping="Wrap"
+                                       Visibility="{Binding UsuarioSeleccionado, Converter={StaticResource NullToVisibilityInverseConverter}, FallbackValue=Visible}"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </TabItem>
+
+            <!-- PESTAÑA: Historial de Accesos -->
+            <TabItem Header="📜 Historial de Accesos">
+                <Border Background="{DynamicResource BackgroundSecondary}" CornerRadius="8" Padding="15" 
+                        Margin="0,15,0,0" BorderBrush="{DynamicResource BorderColor}" BorderThickness="1">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Text="🔒 Registro de intentos de acceso al sistema" FontSize="14" 
+                                   Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,15"/>
+
+                        <DataGrid Grid.Row="1" ItemsSource="{Binding HistorialAccesos}" 
+                                  AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False"
+                                  GridLinesVisibility="Horizontal" HeadersVisibility="Column"
+                                  BorderThickness="0" Background="Transparent">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Fecha/Hora" Binding="{Binding FechaDisplay}" Width="150"/>
+                                <DataGridTextColumn Header="Usuario" Binding="{Binding NombreUsuario}" Width="120"/>
+                                <DataGridTextColumn Header="Resultado" Binding="{Binding ResultadoDisplay}" Width="100"/>
+                                <DataGridTextColumn Header="Equipo" Binding="{Binding NombreEquipo}" Width="120"/>
+                                <DataGridTextColumn Header="Motivo" Binding="{Binding Motivo}" Width="*"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+                </Border>
+            </TabItem>
+
+            <!-- PESTAÑA: Administración de Ventas -->
+            <TabItem Header="🛠️ Administración">
+                <Border Background="{DynamicResource BackgroundSecondary}" CornerRadius="8" Padding="20" 
+                        Margin="0,15,0,0" BorderBrush="{DynamicResource BorderColor}" BorderThickness="1">
+                    
+                    <!-- ScrollViewer para permitir scroll cuando el contenido es grande -->
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel>
+                            <TextBlock Text="⚠️ ELIMINAR VENTAS" FontSize="18" FontWeight="Bold" 
+                                       Foreground="#E74C3C" Margin="0,0,0,10"/>
+                            <TextBlock Text="Use estas opciones con precaución. Las ventas eliminadas no se pueden recuperar." 
+                                       FontSize="12" Foreground="{DynamicResource TextSecondary}" Margin="0,0,0,20" TextWrapping="Wrap"/>
+
+                            <!-- Botón Eliminar ventas del día -->
+                            <Border Background="#FFF3CD" CornerRadius="8" Padding="15" Margin="0,0,0,10">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="📅 Eliminar ventas del DÍA" FontSize="14" FontWeight="Bold" Foreground="#856404"/>
+                                        <TextBlock Text="Elimina todas las ventas registradas hoy" FontSize="11" Foreground="#856404"/>
+                                    </StackPanel>
+                                    <Button Grid.Column="1" Content="Eliminar" Padding="20,10" Background="#F39C12" Foreground="White" 
+                                            BorderThickness="0" Cursor="Hand" FontWeight="Bold"
+                                            Command="{Binding EliminarVentasDiaCommand}"/>
+                                </Grid>
+                            </Border>
+
+                            <!-- Botón Eliminar ventas de la semana -->
+                            <Border Background="#FFE5D0" CornerRadius="8" Padding="15" Margin="0,0,0,10">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="📆 Eliminar ventas de la SEMANA" FontSize="14" FontWeight="Bold" Foreground="#C65102"/>
+                                        <TextBlock Text="Elimina todas las ventas de esta semana" FontSize="11" Foreground="#C65102"/>
+                                    </StackPanel>
+                                    <Button Grid.Column="1" Content="Eliminar" Padding="20,10" Background="#E67E22" Foreground="White" 
+                                            BorderThickness="0" Cursor="Hand" FontWeight="Bold"
+                                            Command="{Binding EliminarVentasSemanaCommand}"/>
+                                </Grid>
+                            </Border>
+
+                            <!-- Botón Eliminar ventas del mes -->
+                            <Border Background="#F8D7DA" CornerRadius="8" Padding="15" Margin="0,0,0,10">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="🗓️ Eliminar ventas del MES" FontSize="14" FontWeight="Bold" Foreground="#721C24"/>
+                                        <TextBlock Text="Elimina todas las ventas de este mes" FontSize="11" Foreground="#721C24"/>
+                                    </StackPanel>
+                                    <Button Grid.Column="1" Content="Eliminar" Padding="20,10" Background="#C0392B" Foreground="White" 
+                                            BorderThickness="0" Cursor="Hand" FontWeight="Bold"
+                                            Command="{Binding EliminarVentasMesCommand}"/>
+                                </Grid>
+                            </Border>
+
+                            <!-- Botón Eliminar TODAS las ventas -->
+                            <Border Background="#E74C3C" CornerRadius="8" Padding="15" Margin="0,20,0,0">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="💀 Eliminar TODAS las ventas" FontSize="14" FontWeight="Bold" Foreground="White"/>
+                                        <TextBlock Text="¡PELIGRO! Elimina TODO el historial de ventas" FontSize="11" Foreground="#FFCCCC"/>
+                                    </StackPanel>
+                                    <Button Grid.Column="1" Content="⚠️ ELIMINAR TODO" Padding="20,10" Background="#8B0000" Foreground="White" 
+                                            BorderThickness="0" Cursor="Hand" FontWeight="Bold"
+                                            Command="{Binding EliminarTodasVentasCommand}"/>
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+                    
+                </Border>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</UserControl>

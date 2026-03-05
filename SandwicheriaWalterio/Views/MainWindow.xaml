@@ -1,0 +1,251 @@
+<Window x:Class="SandwicheriaWalterio.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
+        Title="Sandwichería Walterio - Sistema de Gestión" 
+        Height="750" Width="1300"
+        WindowStartupLocation="CenterScreen"
+        WindowState="Maximized"
+        Background="{DynamicResource BackgroundPrimary}">
+
+    <Window.Resources>
+        <!-- Estilo para botones del menú lateral -->
+        <Style x:Key="MenuButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Height" Value="50"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Tag" Value="Inactive"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" 
+                                Background="{TemplateBinding Background}"
+                                BorderThickness="4,0,0,0"
+                                BorderBrush="Transparent"
+                                Padding="15,0">
+                            <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{DynamicResource MenuHoverBackground}"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="#3498DB"/>
+                            </Trigger>
+                            <Trigger Property="Tag" Value="Active">
+                                <Setter TargetName="border" Property="Background" Value="{DynamicResource MenuActiveBackground}"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="#E67E22"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="60"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="35"/>
+        </Grid.RowDefinitions>
+
+        <!-- ==================== BARRA SUPERIOR ==================== -->
+        <Border Grid.Row="0" Background="#2C3E50">
+            <Grid Margin="15,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Logo y título -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Border Width="40" Height="40" CornerRadius="20" Margin="0,0,12,0">
+                        <Border.Background>
+                            <ImageBrush ImageSource="/logo.png" Stretch="UniformToFill"/>
+                        </Border.Background>
+                    </Border>
+                    <StackPanel>
+                        <TextBlock Text="SANDWICHERÍA WALTERIO" FontSize="16" FontWeight="Bold" Foreground="White"/>
+                        <TextBlock x:Name="txtInfoCaja" Text="No hay caja abierta" FontSize="11" Foreground="#BDC3C7"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Controles del centro -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <!-- Botón cambiar tema -->
+                    <Button x:Name="btnCambiarTema" Click="BtnCambiarTema_Click" 
+                            Background="Transparent" BorderThickness="0" Cursor="Hand"
+                            ToolTip="Cambiar tema Oscuro/Claro">
+                        <StackPanel Orientation="Horizontal">
+                            <fa:IconImage x:Name="iconTema" Icon="Sun" Width="18" Height="18" Foreground="#F1C40F"/>
+                            <TextBlock x:Name="txtTema" Text="Tema Claro" Foreground="White" Margin="8,0,0,0" VerticalAlignment="Center" FontSize="12"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+
+                <!-- Usuario y cerrar sesión -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                    <!-- Panel de usuario clickeable -->
+                    <Border x:Name="panelUsuario" Background="Transparent" Cursor="Hand" CornerRadius="5" Padding="8,5" MouseLeftButtonUp="PanelUsuario_Click">
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#34495E"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                        <StackPanel Orientation="Horizontal">
+                            <fa:IconImage Icon="UserCircle" Width="35" Height="35" Foreground="#3498DB" Margin="0,0,10,0"/>
+                            <StackPanel Margin="0,0,5,0">
+                                <TextBlock x:Name="txtUsuario" Text="Usuario" FontSize="13" Foreground="White" FontWeight="SemiBold"/>
+                                <TextBlock x:Name="txtRol" Text="Rol" FontSize="11" Foreground="#BDC3C7"/>
+                            </StackPanel>
+                            <fa:IconImage Icon="ChevronDown" Width="12" Height="12" Foreground="#BDC3C7" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <Border.ContextMenu>
+                            <ContextMenu x:Name="menuContextoUsuario">
+                                <MenuItem x:Name="menuCambiarNombre" Header="✏️ Cambiar mi nombre" Click="BtnCambiarNombre_Click"/>
+                                <MenuItem x:Name="menuCambiarContraseña" Header="🔑 Cambiar mi contraseña" Click="BtnCambiarMiContraseña_Click"/>
+                                <Separator/>
+                                <MenuItem Header="🚪 Cerrar sesión" Click="BtnCerrarSesion_Click"/>
+                            </ContextMenu>
+                        </Border.ContextMenu>
+                    </Border>
+                    <Button x:Name="btnCerrarSesion" Click="BtnCerrarSesion_Click"
+                            Background="#E74C3C" Foreground="White" 
+                            Padding="12,8" BorderThickness="0" Cursor="Hand" Margin="10,0,0,0"
+                            ToolTip="Cerrar sesión">
+                        <StackPanel Orientation="Horizontal">
+                            <fa:IconImage Icon="SignOutAlt" Width="14" Height="14" Foreground="White"/>
+                            <TextBlock Text="Salir" Margin="8,0,0,0" FontSize="12"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- ==================== CONTENIDO PRINCIPAL ==================== -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="220"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- MENÚ LATERAL -->
+            <Border Grid.Column="0" Background="{DynamicResource SidebarBackground}" 
+                    BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,0,1,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Botones del menú -->
+                    <StackPanel Grid.Row="0" Margin="0,20,0,0">
+                        
+                        <!-- Caja -->
+                        <Button x:Name="btnMenuCaja" Click="BtnMenuCaja_Click" Style="{StaticResource MenuButtonStyle}">
+                            <StackPanel Orientation="Horizontal">
+                                <fa:IconImage Icon="CashRegister" Width="20" Height="20" Foreground="#27AE60"/>
+                                <TextBlock Text="Caja" Margin="15,0,0,0" FontSize="14" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+
+                        <!-- Ventas -->
+                        <Button x:Name="btnMenuVentas" Click="BtnMenuVentas_Click" Style="{StaticResource MenuButtonStyle}">
+                            <StackPanel Orientation="Horizontal">
+                                <fa:IconImage Icon="ShoppingCart" Width="20" Height="20" Foreground="#3498DB"/>
+                                <TextBlock Text="Punto de Venta" Margin="15,0,0,0" FontSize="14" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+
+                        <!-- Menú (antes Productos) -->
+                        <Button x:Name="btnMenuMenu" Click="BtnMenuMenu_Click" Style="{StaticResource MenuButtonStyle}">
+                            <StackPanel Orientation="Horizontal">
+                                <fa:IconImage Icon="Utensils" Width="20" Height="20" Foreground="#E67E22"/>
+                                <TextBlock Text="Menú" Margin="15,0,0,0" FontSize="14" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+
+                        <!-- Mercadería -->
+                        <Button x:Name="btnMenuMercaderia" Click="BtnMenuMercaderia_Click" Style="{StaticResource MenuButtonStyle}">
+                            <StackPanel Orientation="Horizontal">
+                                <fa:IconImage Icon="BoxOpen" Width="20" Height="20" Foreground="#9B59B6"/>
+                                <TextBlock Text="Mercadería" Margin="15,0,0,0" FontSize="14" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+
+                        <!-- Recetas (NUEVO) -->
+                        <Button x:Name="btnMenuRecetas" Click="BtnMenuRecetas_Click" Style="{StaticResource MenuButtonStyle}">
+                            <StackPanel Orientation="Horizontal">
+                                <fa:IconImage Icon="UtensilSpoon" Width="20" Height="20" Foreground="#E67E22"/>
+                                <TextBlock Text="Recetas" Margin="15,0,0,0" FontSize="14" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+
+                        <!-- Reportes -->
+                        <Button x:Name="btnMenuReportes" Click="BtnMenuReportes_Click" Style="{StaticResource MenuButtonStyle}">
+                            <StackPanel Orientation="Horizontal">
+                                <fa:IconImage Icon="ChartBar" Width="20" Height="20" Foreground="#9B59B6"/>
+                                <TextBlock Text="Reportes" Margin="15,0,0,0" FontSize="14" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+
+                        <!-- Usuarios (solo dueño) -->
+                        <Button x:Name="btnMenuUsuarios" Click="BtnMenuUsuarios_Click" Style="{StaticResource MenuButtonStyle}" Visibility="Collapsed">
+                            <StackPanel Orientation="Horizontal">
+                                <fa:IconImage Icon="Users" Width="20" Height="20" Foreground="#1ABC9C"/>
+                                <TextBlock Text="Usuarios" Margin="15,0,0,0" FontSize="14" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+
+                        <!-- Separador -->
+                        <Separator Margin="20,15" Background="{DynamicResource BorderColor}"/>
+
+                        <!-- Configuración -->
+                        <Button x:Name="btnMenuConfig" Click="BtnMenuConfig_Click" Style="{StaticResource MenuButtonStyle}">
+                            <StackPanel Orientation="Horizontal">
+                                <fa:IconImage Icon="Cog" Width="20" Height="20" Foreground="#7F8C8D"/>
+                                <TextBlock Text="Configuración" Margin="15,0,0,0" FontSize="14" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+
+                    <!-- Info versión -->
+                    <Border Grid.Row="1" Padding="15" Background="{DynamicResource BackgroundTertiary}">
+                        <StackPanel>
+                            <TextBlock Text="Sandwichería Walterio" FontSize="11" Foreground="{DynamicResource TextMuted}" FontWeight="SemiBold"/>
+                            <TextBlock Text="v1.0.0 - Sistema de Gestión" FontSize="10" Foreground="{DynamicResource TextMuted}"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
+
+            <!-- ÁREA DE CONTENIDO -->
+            <Border Grid.Column="1" Background="{DynamicResource BackgroundPrimary}">
+                <ContentControl x:Name="contentArea" Margin="20">
+                    <ContentControl.RenderTransform>
+                        <TranslateTransform/>
+                    </ContentControl.RenderTransform>
+                </ContentControl>
+            </Border>
+        </Grid>
+
+        <!-- ==================== BARRA DE ESTADO ==================== -->
+        <Border Grid.Row="2" Background="#34495E" Padding="15,0">
+            <Grid>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <fa:IconImage Icon="InfoCircle" Width="12" Height="12" Foreground="#BDC3C7" Margin="0,0,8,0"/>
+                    <TextBlock x:Name="txtEstado" Text="Sistema listo" FontSize="11" Foreground="#BDC3C7"/>
+                </StackPanel>
+                <TextBlock x:Name="txtFechaHora" HorizontalAlignment="Right" VerticalAlignment="Center"
+                           FontSize="11" Foreground="#BDC3C7"/>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>
