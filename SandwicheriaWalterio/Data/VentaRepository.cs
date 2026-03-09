@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using SandwicheriaWalterio.Interfaces;
 using SandwicheriaWalterio.Models;
 using SandwicheriaWalterio.Services;
 
@@ -8,7 +9,7 @@ namespace SandwicheriaWalterio.Data
     /// Repository de Ventas - USA SQLite LOCAL siempre
     /// Se sincroniza con PostgreSQL cuando hay internet
     /// </summary>
-    public class VentaRepository
+    public class VentaRepository : IVentaRepository
     {
         public VentaRepository() { }
         public VentaRepository(LocalDbContext context) { }

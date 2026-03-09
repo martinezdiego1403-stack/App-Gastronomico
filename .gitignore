@@ -31,5 +31,13 @@ Thumbs.db
 Desktop.ini
 .DS_Store
 
+# Node.js / React
+node_modules/
+sandwicheria-web/build/
+npm-debug.log*
+
+# Archivos temporales con credenciales
+tmp_login.json
+
 # Claude Code
 .claude/

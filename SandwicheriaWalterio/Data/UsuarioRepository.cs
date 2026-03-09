@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using SandwicheriaWalterio.Interfaces;
 using SandwicheriaWalterio.Models;
 using SandwicheriaWalterio.Services;
 
@@ -8,7 +9,7 @@ namespace SandwicheriaWalterio.Data
     /// Repository de Usuarios - USA SQLite LOCAL siempre
     /// Se sincroniza con PostgreSQL cuando hay internet
     /// </summary>
-    public class UsuarioRepository
+    public class UsuarioRepository : IUsuarioRepository
     {
         private const int MaxIntentosLogin = 5;
         private const int MinutosBloqueo = 15;

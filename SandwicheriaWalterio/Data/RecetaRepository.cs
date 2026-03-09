@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using SandwicheriaWalterio.Interfaces;
 using SandwicheriaWalterio.Models;
 
 namespace SandwicheriaWalterio.Data
@@ -6,7 +7,7 @@ namespace SandwicheriaWalterio.Data
     /// <summary>
     /// Repositorio para gestionar Recetas e Ingredientes
     /// </summary>
-    public class RecetaRepository
+    public class RecetaRepository : IRecetaRepository
     {
         // ============================================
         // RECETAS - CRUD

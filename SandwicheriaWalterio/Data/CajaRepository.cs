@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using SandwicheriaWalterio.Interfaces;
 using SandwicheriaWalterio.Models;
 using SandwicheriaWalterio.Services;
 
@@ -8,7 +9,7 @@ namespace SandwicheriaWalterio.Data
     /// Repository de Caja - USA SQLite LOCAL siempre
     /// Se sincroniza con PostgreSQL cuando hay internet
     /// </summary>
-    public class CajaRepository
+    public class CajaRepository : ICajaRepository
     {
         public CajaRepository() { }
         public CajaRepository(LocalDbContext context) { }

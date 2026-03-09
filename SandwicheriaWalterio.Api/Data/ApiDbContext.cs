@@ -8,6 +8,9 @@ namespace SandwicheriaWalterio.Api.Data
     {
         private readonly ITenantService _tenantService;
 
+        // Propiedad que EF Core re-evalúa dinámicamente en cada consulta
+        private string CurrentTenantId => _tenantService.GetTenantId();
+
         public ApiDbContext(DbContextOptions<ApiDbContext> options, ITenantService tenantService)
             : base(options)
         {
@@ -28,6 +31,7 @@ namespace SandwicheriaWalterio.Api.Data
         public DbSet<MovimientoStock> MovimientosStock { get; set; }
         public DbSet<Receta> Recetas { get; set; }
         public DbSet<IngredienteReceta> IngredientesReceta { get; set; }
+        public DbSet<ConfiguracionTenant> Configuraciones { get; set; }
 
         // ============================================
         // CONFIGURACIÓN DE MODELOS
@@ -51,20 +55,21 @@ namespace SandwicheriaWalterio.Api.Data
 
             // ============================================
             // GLOBAL QUERY FILTERS (Multi-Tenant)
+            // Referenciamos CurrentTenantId (propiedad del DbContext)
+            // EF Core re-evalúa propiedades del DbContext en cada consulta
             // ============================================
 
-            var tenantId = _tenantService.GetTenantId();
-
-            modelBuilder.Entity<Usuario>().HasQueryFilter(e => e.TenantId == tenantId);
-            modelBuilder.Entity<HistorialAcceso>().HasQueryFilter(e => e.TenantId == tenantId);
-            modelBuilder.Entity<Categoria>().HasQueryFilter(e => e.TenantId == tenantId);
-            modelBuilder.Entity<Producto>().HasQueryFilter(e => e.TenantId == tenantId);
-            modelBuilder.Entity<Caja>().HasQueryFilter(e => e.TenantId == tenantId);
-            modelBuilder.Entity<Venta>().HasQueryFilter(e => e.TenantId == tenantId);
-            modelBuilder.Entity<DetalleVenta>().HasQueryFilter(e => e.TenantId == tenantId);
-            modelBuilder.Entity<MovimientoStock>().HasQueryFilter(e => e.TenantId == tenantId);
-            modelBuilder.Entity<Receta>().HasQueryFilter(e => e.TenantId == tenantId);
-            modelBuilder.Entity<IngredienteReceta>().HasQueryFilter(e => e.TenantId == tenantId);
+            modelBuilder.Entity<Usuario>().HasQueryFilter(e => e.TenantId == CurrentTenantId);
+            modelBuilder.Entity<HistorialAcceso>().HasQueryFilter(e => e.TenantId == CurrentTenantId);
+            modelBuilder.Entity<Categoria>().HasQueryFilter(e => e.TenantId == CurrentTenantId);
+            modelBuilder.Entity<Producto>().HasQueryFilter(e => e.TenantId == CurrentTenantId);
+            modelBuilder.Entity<Caja>().HasQueryFilter(e => e.TenantId == CurrentTenantId);
+            modelBuilder.Entity<Venta>().HasQueryFilter(e => e.TenantId == CurrentTenantId);
+            modelBuilder.Entity<DetalleVenta>().HasQueryFilter(e => e.TenantId == CurrentTenantId);
+            modelBuilder.Entity<MovimientoStock>().HasQueryFilter(e => e.TenantId == CurrentTenantId);
+            modelBuilder.Entity<Receta>().HasQueryFilter(e => e.TenantId == CurrentTenantId);
+            modelBuilder.Entity<IngredienteReceta>().HasQueryFilter(e => e.TenantId == CurrentTenantId);
+            modelBuilder.Entity<ConfiguracionTenant>().HasQueryFilter(e => e.TenantId == CurrentTenantId);
 
             // ============================================
             // RELACIONES (mismas que LocalDbContext)
@@ -198,13 +203,17 @@ namespace SandwicheriaWalterio.Api.Data
 
         private void SetTenantId()
         {
-            var tenantId = _tenantService.GetTenantId();
+            var tenantId = CurrentTenantId;
 
             foreach (var entry in ChangeTracker.Entries<ITenantEntity>())
             {
                 if (entry.State == EntityState.Added)
                 {
-                    entry.Entity.TenantId = tenantId;
+                    // No sobreescribir si ya tiene un TenantId asignado manualmente
+                    if (string.IsNullOrEmpty(entry.Entity.TenantId) || entry.Entity.TenantId == "local")
+                    {
+                        entry.Entity.TenantId = tenantId;
+                    }
                 }
             }
         }

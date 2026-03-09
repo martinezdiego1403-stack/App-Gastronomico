@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using SandwicheriaWalterio.Interfaces;
 using SandwicheriaWalterio.Models;
 
 namespace SandwicheriaWalterio.Data
@@ -6,7 +7,7 @@ namespace SandwicheriaWalterio.Data
     /// <summary>
     /// Repository de Reportes - USA SQLite LOCAL
     /// </summary>
-    public class ReporteRepository
+    public class ReporteRepository : IReporteRepository
     {
         public ReporteRepository() { }
         public ReporteRepository(LocalDbContext context) { }
