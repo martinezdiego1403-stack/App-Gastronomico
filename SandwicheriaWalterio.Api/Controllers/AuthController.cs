@@ -127,7 +127,7 @@ namespace SandwicheriaWalterio.Api.Controllers
                 FechaCreacion = DateTime.UtcNow,
                 FechaExpiracionTrial = DateTime.UtcNow.AddDays(7),
                 EmailContacto = request.Email,
-                UsuarioDueñoID = usuario.UsuarioID
+                UsuarioDuenoID = usuario.UsuarioID
             };
 
             _db.Tenants.Add(tenant);
@@ -208,7 +208,7 @@ namespace SandwicheriaWalterio.Api.Controllers
                 FechaExpiracionTrial = DateTime.UtcNow.AddDays(7),
                 EmailContacto = request.Email,
                 Telefono = request.Telefono,
-                UsuarioDueñoID = usuario.UsuarioID
+                UsuarioDuenoID = usuario.UsuarioID
             };
 
             _db.Tenants.Add(tenant);

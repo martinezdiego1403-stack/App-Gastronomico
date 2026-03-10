@@ -173,7 +173,7 @@ using (var scope = app.Services.CreateScope())
                 FechaCreacion = usuario.FechaCreacion,
                 FechaExpiracionTrial = DateTime.UtcNow.AddDays(30), // 30 días extra para existentes
                 EmailContacto = usuario.Email,
-                UsuarioDueñoID = usuario.UsuarioID
+                UsuarioDuenoID = usuario.UsuarioID
             });
             Console.WriteLine($"  [SEED] Tenant creado para usuario {usuario.NombreUsuario} ({usuario.TenantId})");
         }

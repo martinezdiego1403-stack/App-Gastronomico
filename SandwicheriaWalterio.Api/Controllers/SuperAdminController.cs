@@ -65,7 +65,7 @@ namespace SandwicheriaWalterio.Api.Controllers
                     t.FechaExpiracionTrial,
                     t.EmailContacto,
                     t.Telefono,
-                    t.UsuarioDueñoID,
+                    t.UsuarioDuenoID,
                     // Contar usuarios y ventas de cada tenant
                     cantidadUsuarios = _db.Usuarios.IgnoreQueryFilters().Count(u => u.TenantId == t.TenantId),
                     cantidadVentas = _db.Ventas.IgnoreQueryFilters().Count(v => v.TenantId == t.TenantId),
@@ -108,7 +108,7 @@ namespace SandwicheriaWalterio.Api.Controllers
                     tenant.FechaExpiracionTrial,
                     tenant.EmailContacto,
                     tenant.Telefono,
-                    tenant.UsuarioDueñoID,
+                    tenant.UsuarioDuenoID,
                     tenant.EsTrial,
                     tenant.TrialExpirado,
                     tenant.DiasRestantesTrial

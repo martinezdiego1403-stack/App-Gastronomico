@@ -64,7 +64,7 @@ namespace SandwicheriaWalterio.Models
         /// <summary>
         /// ID del usuario dueño que creó el tenant
         /// </summary>
-        public int UsuarioDueñoID { get; set; }
+        public int UsuarioDuenoID { get; set; }
 
         // ============================================
         // PROPIEDADES CALCULADAS
