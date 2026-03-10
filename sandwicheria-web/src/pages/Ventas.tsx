@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { productosService, recetasService, ventasService, cajasService } from '../services/api';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiShoppingCart, FiSearch, FiTrash2, FiPlus, FiMinus, FiCheck } from 'react-icons/fi';
+import { FiShoppingCart, FiSearch, FiTrash2, FiPlus, FiMinus, FiCheck, FiPrinter } from 'react-icons/fi';
 
 interface ItemVenta {
   id: number;
@@ -20,6 +20,7 @@ export default function Ventas() {
   const [montoPagado, setMontoPagado] = useState('');
   const [cajaAbiertaId, setCajaAbiertaId] = useState<number | null>(null);
   const [mensaje, setMensaje] = useState('');
+  const [ultimaVentaId, setUltimaVentaId] = useState<number | null>(null);
 
   useEffect(() => {
     cargarDatos();
@@ -91,20 +92,71 @@ export default function Ventas() {
         cantidad: c.cantidad,
         precioUnitario: c.precio,
       }));
-      await ventasService.registrar({
+      const res = await ventasService.registrar({
         cajaID: cajaAbiertaId,
         metodoPago,
         total,
         montoPagado: parseFloat(montoPagado) || total,
         detalles,
       });
+      const ventaId = res.data?.ventaId;
+      setUltimaVentaId(ventaId || null);
       setCarrito([]);
       setMontoPagado('');
       setMensaje('Venta registrada con exito!');
-      setTimeout(() => setMensaje(''), 3000);
+      setTimeout(() => setMensaje(''), 5000);
       cargarDatos();
     } catch (err: any) {
       setMensaje(err.response?.data?.error || 'Error al registrar venta');
+    }
+  };
+
+  const imprimirTicket = async (ventaId: number) => {
+    try {
+      const res = await ventasService.obtenerTicket(ventaId);
+      const t = res.data;
+      const win = window.open('', '_blank', 'width=320,height=600');
+      if (!win) return;
+      win.document.write(`
+        <html><head><title>Ticket #${t.comprobanteCompleto}</title>
+        <style>
+          * { margin: 0; padding: 0; box-sizing: border-box; }
+          body { font-family: 'Courier New', monospace; font-size: 12px; width: 280px; padding: 10px; color: #000; background: #fff; }
+          .center { text-align: center; }
+          .bold { font-weight: bold; }
+          .line { border-top: 1px dashed #000; margin: 6px 0; }
+          .row { display: flex; justify-content: space-between; }
+          .big { font-size: 16px; font-weight: bold; }
+          .item-name { flex: 1; }
+          .item-price { text-align: right; min-width: 70px; }
+          @media print { body { width: 58mm; padding: 2mm; } }
+        </style></head><body>
+          <div class="center bold big">${t.nombreNegocio}</div>
+          ${t.direccion ? '<div class="center">' + t.direccion + '</div>' : ''}
+          ${t.telefono ? '<div class="center">Tel: ' + t.telefono + '</div>' : ''}
+          ${t.cuit !== 'Sin CUIT' ? '<div class="center">CUIT: ' + t.cuit + '</div>' : ''}
+          ${t.condicionFiscal !== 'ConsumidorFinal' ? '<div class="center">' + t.condicionFiscal + '</div>' : ''}
+          <div class="line"></div>
+          <div class="center bold">${t.esFactura ? 'FACTURA ' + t.tipoComprobante : 'TICKET'}</div>
+          <div class="center">N° ${t.comprobanteCompleto}</div>
+          <div class="center">${t.fecha}</div>
+          <div class="center">Vendedor: ${t.vendedor}</div>
+          <div class="center">Pago: ${t.metodoPago}</div>
+          <div class="line"></div>
+          ${(t.items || []).map((item: any) =>
+            '<div class="row"><span class="item-name">' + item.cantidad + 'x ' + item.nombre + '</span><span class="item-price">$' + item.subtotal.toLocaleString('es-AR') + '</span></div>'
+          ).join('')}
+          <div class="line"></div>
+          <div class="row big"><span>TOTAL</span><span>$${t.total.toLocaleString('es-AR')}</span></div>
+          <div class="line"></div>
+          <div class="center" style="margin-top:8px;font-size:10px">${t.leyenda}</div>
+          <div class="center" style="margin-top:4px;font-size:10px">*** GRACIAS POR SU COMPRA ***</div>
+        </body></html>
+      `);
+      win.document.close();
+      setTimeout(() => { win.print(); }, 300);
+    } catch (err) {
+      console.error('Error generando ticket', err);
     }
   };
 
@@ -220,6 +272,16 @@ export default function Ventas() {
             <button className="btn btn-success btn-block" onClick={registrarVenta} disabled={!cajaAbiertaId}>
               <FiCheck /> Registrar Venta
             </button>
+
+            {ultimaVentaId && (
+              <button
+                className="btn btn-outline btn-block"
+                onClick={() => imprimirTicket(ultimaVentaId)}
+                style={{ marginTop: '0.5rem' }}
+              >
+                <FiPrinter /> Imprimir Ticket
+              </button>
+            )}
           </div>
         </div>
       </div>

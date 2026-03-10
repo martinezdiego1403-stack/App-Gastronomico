@@ -90,6 +90,55 @@ namespace SandwicheriaWalterio.Api.Controllers
                 tenant.FechaCreacion
             });
         }
+
+        /// <summary>
+        /// GET /api/tenantsettings/fiscal - Datos fiscales del negocio
+        /// </summary>
+        [HttpGet("fiscal")]
+        public IActionResult ObtenerDatosFiscales()
+        {
+            var tenantId = _tenantService.GetTenantId();
+            var tenant = _db.Tenants.FirstOrDefault(t => t.TenantId == tenantId);
+
+            if (tenant == null)
+                return NotFound(new { error = "Tenant no encontrado" });
+
+            return Ok(new
+            {
+                tenant.CondicionFiscal,
+                tenant.Cuit,
+                tenant.DireccionFiscal,
+                tenant.PuntoVenta,
+                tenant.UltimoNumeroTicket,
+                tenant.TipoFactura
+            });
+        }
+
+        /// <summary>
+        /// PUT /api/tenantsettings/fiscal - Actualizar datos fiscales
+        /// </summary>
+        [HttpPut("fiscal")]
+        public IActionResult ActualizarDatosFiscales([FromBody] ActualizarFiscalRequest request)
+        {
+            var tenantId = _tenantService.GetTenantId();
+            var tenant = _db.Tenants.FirstOrDefault(t => t.TenantId == tenantId);
+
+            if (tenant == null)
+                return NotFound(new { error = "Tenant no encontrado" });
+
+            var condicionesValidas = new[] { "ConsumidorFinal", "Monotributista", "ResponsableInscripto" };
+            if (!condicionesValidas.Contains(request.CondicionFiscal))
+                return BadRequest(new { error = "Condicion fiscal invalida" });
+
+            tenant.CondicionFiscal = request.CondicionFiscal;
+            if (request.Cuit != null) tenant.Cuit = request.Cuit;
+            if (request.DireccionFiscal != null) tenant.DireccionFiscal = request.DireccionFiscal;
+            if (request.PuntoVenta.HasValue) tenant.PuntoVenta = request.PuntoVenta.Value;
+
+            _db.SaveChangesWithoutFilters();
+
+            return Ok(new { mensaje = "Datos fiscales actualizados", tipoFactura = tenant.TipoFactura });
+        }
     }
 
     public class ActualizarNegocioRequest
@@ -97,5 +146,13 @@ namespace SandwicheriaWalterio.Api.Controllers
         public string NombreNegocio { get; set; } = string.Empty;
         public string? EmailContacto { get; set; }
         public string? Telefono { get; set; }
+    }
+
+    public class ActualizarFiscalRequest
+    {
+        public string CondicionFiscal { get; set; } = "ConsumidorFinal";
+        public string? Cuit { get; set; }
+        public string? DireccionFiscal { get; set; }
+        public int? PuntoVenta { get; set; }
     }
 }

@@ -106,6 +106,7 @@ export const ventasService = {
   obtenerPorCaja: (cajaId: number) => api.get(`/ventas/por-caja/${cajaId}`),
   obtenerPorRango: (fechaInicio: string, fechaFin: string) =>
     api.get(`/ventas/por-rango?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`),
+  obtenerTicket: (ventaId: number) => api.get(`/ventas/${ventaId}/ticket`),
 };
 
 // ============================================
@@ -168,6 +169,9 @@ export const tenantSettingsService = {
   actualizarMiNegocio: (data: { nombreNegocio: string; emailContacto?: string; telefono?: string }) =>
     api.put('/tenantsettings/mi-negocio', data),
   obtenerPlan: () => api.get('/tenantsettings/plan'),
+  obtenerFiscal: () => api.get('/tenantsettings/fiscal'),
+  actualizarFiscal: (data: { condicionFiscal: string; cuit?: string; direccionFiscal?: string; puntoVenta?: number }) =>
+    api.put('/tenantsettings/fiscal', data),
 };
 
 // ============================================

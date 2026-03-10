@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SandwicheriaWalterio.Api.Data;
+using SandwicheriaWalterio.Api.Services;
 using SandwicheriaWalterio.DTOs.Ventas;
 using SandwicheriaWalterio.Interfaces;
 using SandwicheriaWalterio.Models;
@@ -14,11 +16,15 @@ namespace SandwicheriaWalterio.Api.Controllers
     {
         private readonly IVentaRepository _ventaRepo;
         private readonly IRecetaRepository _recetaRepo;
+        private readonly ApiDbContext _db;
+        private readonly ITenantService _tenantService;
 
-        public VentasController(IVentaRepository ventaRepo, IRecetaRepository recetaRepo)
+        public VentasController(IVentaRepository ventaRepo, IRecetaRepository recetaRepo, ApiDbContext db, ITenantService tenantService)
         {
             _ventaRepo = ventaRepo;
             _recetaRepo = recetaRepo;
+            _db = db;
+            _tenantService = tenantService;
         }
 
         private int GetUsuarioId() =>
@@ -81,6 +87,84 @@ namespace SandwicheriaWalterio.Api.Controllers
             }
 
             return CreatedAtAction(nameof(ObtenerPorId), new { id = ventaId }, new { ventaId });
+        }
+
+        /// <summary>
+        /// GET /api/ventas/{id}/ticket - Genera datos del ticket/factura para imprimir
+        /// Plan Mensual: ticket común. Plan DePorVida: factura A/B/C según condición fiscal.
+        /// </summary>
+        [HttpGet("{id:int}/ticket")]
+        public IActionResult GenerarTicket(int id)
+        {
+            var venta = _ventaRepo.ObtenerPorId(id);
+            if (venta == null) return NotFound(new { error = "Venta no encontrada" });
+
+            var tenantId = _tenantService.GetTenantId();
+            var tenant = _db.Tenants.FirstOrDefault(t => t.TenantId == tenantId);
+
+            if (tenant == null) return NotFound(new { error = "Tenant no encontrado" });
+
+            // Incrementar número de ticket
+            tenant.UltimoNumeroTicket++;
+            _db.SaveChangesWithoutFilters();
+
+            var numeroTicket = tenant.UltimoNumeroTicket;
+            var puntoVenta = tenant.PuntoVenta.ToString("D4"); // 0001
+            var numeroFormateado = numeroTicket.ToString("D8"); // 00000001
+            var esFactura = tenant.Plan == "DePorVida" && tenant.CondicionFiscal != "ConsumidorFinal";
+
+            // Determinar tipo de comprobante
+            string tipoComprobante;
+            if (!esFactura)
+            {
+                tipoComprobante = "X"; // Ticket común (no fiscal)
+            }
+            else if (tenant.CondicionFiscal == "Monotributista")
+            {
+                tipoComprobante = "C";
+            }
+            else // ResponsableInscripto
+            {
+                tipoComprobante = "B"; // B para consumidor final, A si el comprador es RI
+            }
+
+            var items = venta.Detalles?.Select(d => new
+            {
+                nombre = !string.IsNullOrEmpty(d.NombreReceta) ? d.NombreReceta : d.Producto?.Nombre ?? "Producto",
+                cantidad = d.Cantidad,
+                precioUnitario = d.PrecioUnitario,
+                subtotal = d.Subtotal
+            }).ToList();
+
+            return Ok(new
+            {
+                // Datos del negocio
+                nombreNegocio = tenant.NombreNegocio,
+                cuit = tenant.Cuit ?? "Sin CUIT",
+                condicionFiscal = tenant.CondicionFiscal,
+                direccion = tenant.DireccionFiscal ?? "",
+                telefono = tenant.Telefono ?? "",
+
+                // Datos del comprobante
+                tipoComprobante, // X = ticket, A, B, C = factura
+                esFactura,
+                puntoVenta,
+                numero = numeroFormateado,
+                comprobanteCompleto = $"{puntoVenta}-{numeroFormateado}",
+
+                // Datos de la venta
+                ventaID = venta.VentaID,
+                fecha = venta.FechaVenta.ToString("dd/MM/yyyy HH:mm"),
+                vendedor = venta.Usuario?.NombreCompleto ?? "",
+                metodoPago = venta.MetodoPago,
+                items,
+                total = venta.Total,
+
+                // Leyenda legal
+                leyenda = esFactura
+                    ? $"Factura {tipoComprobante} - Documento no fiscal hasta integrar AFIP"
+                    : "Documento no valido como factura"
+            });
         }
 
         private static VentaDto MapToDto(Venta v) => new()

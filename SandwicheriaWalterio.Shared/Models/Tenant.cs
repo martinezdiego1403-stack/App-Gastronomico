@@ -67,8 +67,47 @@ namespace SandwicheriaWalterio.Models
         public int UsuarioDuenoID { get; set; }
 
         // ============================================
+        // DATOS FISCALES
+        // ============================================
+
+        /// <summary>
+        /// Condición fiscal: "ConsumidorFinal", "Monotributista", "ResponsableInscripto"
+        /// </summary>
+        [MaxLength(30)]
+        public string CondicionFiscal { get; set; } = "ConsumidorFinal";
+
+        /// <summary>
+        /// CUIT del negocio (ej: 20-12345678-9)
+        /// </summary>
+        [MaxLength(15)]
+        public string? Cuit { get; set; }
+
+        /// <summary>
+        /// Dirección fiscal del negocio
+        /// </summary>
+        [MaxLength(250)]
+        public string? DireccionFiscal { get; set; }
+
+        /// <summary>
+        /// Punto de venta fiscal (ej: 0001)
+        /// </summary>
+        public int PuntoVenta { get; set; } = 1;
+
+        /// <summary>
+        /// Último número de ticket/factura emitido
+        /// </summary>
+        public int UltimoNumeroTicket { get; set; } = 0;
+
+        // ============================================
         // PROPIEDADES CALCULADAS
         // ============================================
+
+        /// <summary>
+        /// Tipo de factura que emite según condición fiscal:
+        /// Monotributista → C, ResponsableInscripto → A o B
+        /// </summary>
+        [NotMapped]
+        public string TipoFactura => CondicionFiscal == "ResponsableInscripto" ? "A/B" : CondicionFiscal == "Monotributista" ? "C" : "X";
 
         [NotMapped]
         public bool EsTrial => Plan == "Trial";

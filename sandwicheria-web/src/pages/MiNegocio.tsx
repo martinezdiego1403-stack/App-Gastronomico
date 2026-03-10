@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { tenantSettingsService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import { FiSave, FiHome, FiMail, FiPhone, FiClock } from 'react-icons/fi';
+import { FiSave, FiHome, FiMail, FiPhone, FiClock, FiFileText } from 'react-icons/fi';
 
 interface TenantInfo {
   tenantId: string;
@@ -27,8 +27,15 @@ export default function MiNegocio() {
   const [emailContacto, setEmailContacto] = useState('');
   const [telefono, setTelefono] = useState('');
   const [planInfo, setPlanInfo] = useState<PlanInfo | null>(null);
+  const [condicionFiscal, setCondicionFiscal] = useState('ConsumidorFinal');
+  const [cuit, setCuit] = useState('');
+  const [direccionFiscal, setDireccionFiscal] = useState('');
+  const [puntoVenta, setPuntoVenta] = useState(1);
+  const [tipoFactura, setTipoFactura] = useState('X');
   const [guardando, setGuardando] = useState(false);
+  const [guardandoFiscal, setGuardandoFiscal] = useState(false);
   const [mensaje, setMensaje] = useState('');
+  const [mensajeFiscal, setMensajeFiscal] = useState('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -37,13 +44,23 @@ export default function MiNegocio() {
 
   const cargarDatos = async () => {
     try {
-      const [negocioRes, planRes] = await Promise.all([
+      const [negocioRes, planRes, fiscalRes] = await Promise.all([
         tenantSettingsService.obtenerMiNegocio(),
         tenantSettingsService.obtenerPlan(),
+        tenantSettingsService.obtenerFiscal(),
       ]);
       const negocio = negocioRes.data;
       setNombreNegocio(negocio.nombreNegocio || '');
+      setEmailContacto(negocio.emailContacto || '');
+      setTelefono(negocio.telefono || '');
       setPlanInfo(planRes.data);
+
+      const fiscal = fiscalRes.data;
+      setCondicionFiscal(fiscal.condicionFiscal || 'ConsumidorFinal');
+      setCuit(fiscal.cuit || '');
+      setDireccionFiscal(fiscal.direccionFiscal || '');
+      setPuntoVenta(fiscal.puntoVenta || 1);
+      setTipoFactura(fiscal.tipoFactura || 'X');
     } catch (err) {
       console.error('Error cargando datos del negocio', err);
     } finally {
@@ -71,6 +88,26 @@ export default function MiNegocio() {
       setMensaje('Error al guardar');
     } finally {
       setGuardando(false);
+    }
+  };
+
+  const guardarFiscal = async () => {
+    setGuardandoFiscal(true);
+    setMensajeFiscal('');
+    try {
+      const res = await tenantSettingsService.actualizarFiscal({
+        condicionFiscal,
+        cuit: cuit || undefined,
+        direccionFiscal: direccionFiscal || undefined,
+        puntoVenta: puntoVenta || undefined,
+      });
+      setTipoFactura(res.data.tipoFactura || 'X');
+      setMensajeFiscal('Datos fiscales guardados correctamente');
+      setTimeout(() => setMensajeFiscal(''), 3000);
+    } catch (err) {
+      setMensajeFiscal('Error al guardar datos fiscales');
+    } finally {
+      setGuardandoFiscal(false);
     }
   };
 
@@ -151,6 +188,82 @@ export default function MiNegocio() {
 
         <button className="btn-primary" onClick={guardar} disabled={guardando}>
           <FiSave /> {guardando ? 'Guardando...' : 'Guardar cambios'}
+        </button>
+      </div>
+
+      {/* Fiscal Settings Form */}
+      <div className="form-card">
+        <h3><FiFileText /> Datos Fiscales</h3>
+        <p className="form-description">
+          Estos datos determinan el tipo de comprobante que se emite al imprimir tickets.
+        </p>
+
+        <div className="form-group">
+          <label>Condicion Fiscal</label>
+          <select value={condicionFiscal} onChange={e => setCondicionFiscal(e.target.value)}>
+            <option value="ConsumidorFinal">Consumidor Final (Ticket comun)</option>
+            <option value="Monotributista">Monotributista (Factura C)</option>
+            <option value="ResponsableInscripto">Responsable Inscripto (Factura A/B)</option>
+          </select>
+        </div>
+
+        {condicionFiscal !== 'ConsumidorFinal' && (
+          <>
+            <div className="form-group">
+              <label>CUIT</label>
+              <input
+                type="text"
+                value={cuit}
+                onChange={e => setCuit(e.target.value)}
+                placeholder="XX-XXXXXXXX-X"
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Direccion Fiscal</label>
+              <input
+                type="text"
+                value={direccionFiscal}
+                onChange={e => setDireccionFiscal(e.target.value)}
+                placeholder="Av. San Martin 1234, CABA"
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Punto de Venta</label>
+              <input
+                type="number"
+                min={1}
+                max={9999}
+                value={puntoVenta}
+                onChange={e => setPuntoVenta(parseInt(e.target.value) || 1)}
+              />
+            </div>
+          </>
+        )}
+
+        <div className="fiscal-info">
+          <span className="fiscal-label">Tipo de comprobante:</span>
+          <span className={`fiscal-badge badge-${tipoFactura === 'X' ? 'ticket' : 'factura'}`}>
+            {tipoFactura === 'X' ? 'Ticket comun (X)' :
+             tipoFactura === 'C' ? 'Factura C' :
+             'Factura A/B'}
+          </span>
+          {planInfo?.plan === 'Mensual' && condicionFiscal !== 'ConsumidorFinal' && (
+            <p className="fiscal-note">
+              Con el plan Mensual solo se emiten tickets comunes. Actualiza al plan De por Vida para emitir facturas.
+            </p>
+          )}
+        </div>
+
+        {mensajeFiscal && (
+          <div className={`form-message ${mensajeFiscal.includes('Error') ? 'error' : 'success'}`}>
+            {mensajeFiscal}
+          </div>
+        )}
+
+        <button className="btn-primary" onClick={guardarFiscal} disabled={guardandoFiscal}>
+          <FiSave /> {guardandoFiscal ? 'Guardando...' : 'Guardar datos fiscales'}
         </button>
       </div>
     </div>
