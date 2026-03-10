@@ -25,8 +25,21 @@ builder.Services.AddScoped<ITenantService, TenantService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 
 // DbContext con PostgreSQL
+// Soporta tanto formato URL (Railway) como formato .NET (local)
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? Environment.GetEnvironmentVariable("DATABASE_URL")
+    ?? "";
+
+// Convertir formato URL de Railway a formato .NET si es necesario
+if (connectionString.StartsWith("postgresql://") || connectionString.StartsWith("postgres://"))
+{
+    var uri = new Uri(connectionString);
+    var userInfo = uri.UserInfo.Split(':');
+    connectionString = $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]};SSL Mode=Require;Trust Server Certificate=true";
+}
+
 builder.Services.AddDbContext<ApiDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(connectionString));
 
 // Repositorios (Dependency Injection)
 builder.Services.AddScoped<IUsuarioRepository, ApiUsuarioRepository>();
