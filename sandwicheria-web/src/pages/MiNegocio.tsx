@@ -95,10 +95,17 @@ export default function MiNegocio() {
           </div>
           <p className="plan-card-text">
             {planInfo.esTrial
-              ? `Tu prueba gratis vence el ${planInfo.fechaExpiracionTrial ? new Date(planInfo.fechaExpiracionTrial).toLocaleDateString('es-AR') : ''}`
-              : 'Tenes acceso completo al sistema.'
+              ? `Tu prueba gratis vence el ${planInfo.fechaExpiracionTrial ? new Date(planInfo.fechaExpiracionTrial).toLocaleDateString('es-AR') : ''}.`
+              : planInfo.plan === 'DePorVida'
+              ? 'Tenes acceso de por vida a la app de escritorio.'
+              : 'Tenes acceso completo al sistema via web.'
             }
           </p>
+          {planInfo.esTrial && (
+            <p className="plan-card-text" style={{ marginTop: '0.5rem', fontSize: '0.85rem' }}>
+              Para activar un plan, contactanos a <strong style={{ color: 'var(--accent-primary)' }}>admin@gastronomiapp.com</strong>
+            </p>
+          )}
         </div>
       )}
 

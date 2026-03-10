@@ -149,6 +149,11 @@ namespace SandwicheriaWalterio.Api.Controllers
             if (tenant == null)
                 return NotFound(new { error = "Tenant no encontrado" });
 
+            // Validar planes permitidos
+            var planesValidos = new[] { "Trial", "Mensual", "DePorVida" };
+            if (!planesValidos.Contains(request.Plan))
+                return BadRequest(new { error = $"Plan invalido. Planes validos: {string.Join(", ", planesValidos)}" });
+
             tenant.Plan = request.Plan;
 
             // Si cambia a un plan pago, quitar fecha de expiración trial

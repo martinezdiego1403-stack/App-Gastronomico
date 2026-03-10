@@ -155,8 +155,8 @@ export default function SuperAdminDashboard() {
                       onChange={e => cambiarPlan(t.tenantId, e.target.value)}
                     >
                       <option value="Trial">Trial</option>
-                      <option value="Basico">Basico</option>
-                      <option value="Pro">Pro</option>
+                      <option value="Mensual">Mensual</option>
+                      <option value="DePorVida">De por vida</option>
                     </select>
                   </td>
                   <td>
