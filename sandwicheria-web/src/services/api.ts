@@ -34,10 +34,10 @@ api.interceptors.response.use(
 // ============================================
 export const authService = {
   login: (nombreUsuario: string, contraseña: string) =>
-    api.post('/auth/login', { nombreUsuario, contraseña }),
+    api.post('/auth/login', { NombreUsuario: nombreUsuario, 'Contraseña': contraseña }),
 
   register: (data: { nombreUsuario: string; nombreCompleto: string; email: string; contraseña: string }) =>
-    api.post('/auth/register', data),
+    api.post('/auth/register', { NombreUsuario: data.nombreUsuario, NombreCompleto: data.nombreCompleto, Email: data.email, 'Contraseña': data.contraseña }),
 };
 
 // ============================================
