@@ -1,5 +1,5 @@
 import { useState, FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { motion } from 'framer-motion';
 import { FiUser, FiLock, FiLogIn } from 'react-icons/fi';
@@ -24,7 +24,7 @@ export default function Login() {
       await login(nombreUsuario, contrasena);
       navigate('/');
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Error al iniciar sesion');
+      setError(err.message || err.response?.data?.error || 'Error al iniciar sesion');
     } finally {
       setLoading(false);
     }
@@ -91,7 +91,9 @@ export default function Login() {
           </button>
         </form>
 
-        <p className="login-footer">La Sandwicheria &copy; 2026 - v2.0 SaaS</p>
+        <p className="login-footer">
+          No tenes cuenta? <Link to="/registro" className="link-accent">Registra tu negocio</Link>
+        </p>
       </motion.div>
     </div>
   );

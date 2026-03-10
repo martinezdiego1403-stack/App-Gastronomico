@@ -32,6 +32,7 @@ namespace SandwicheriaWalterio.Api.Data
         public DbSet<Receta> Recetas { get; set; }
         public DbSet<IngredienteReceta> IngredientesReceta { get; set; }
         public DbSet<ConfiguracionTenant> Configuraciones { get; set; }
+        public DbSet<Tenant> Tenants { get; set; }
 
         // ============================================
         // CONFIGURACIÓN DE MODELOS
@@ -70,6 +71,15 @@ namespace SandwicheriaWalterio.Api.Data
             modelBuilder.Entity<Receta>().HasQueryFilter(e => e.TenantId == CurrentTenantId);
             modelBuilder.Entity<IngredienteReceta>().HasQueryFilter(e => e.TenantId == CurrentTenantId);
             modelBuilder.Entity<ConfiguracionTenant>().HasQueryFilter(e => e.TenantId == CurrentTenantId);
+
+            // ============================================
+            // TENANT (tabla de plataforma, SIN query filter)
+            // ============================================
+
+            modelBuilder.Entity<Tenant>(entity =>
+            {
+                entity.HasIndex(t => t.TenantId).IsUnique();
+            });
 
             // ============================================
             // RELACIONES (mismas que LocalDbContext)

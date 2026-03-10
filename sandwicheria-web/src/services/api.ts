@@ -16,14 +16,19 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Interceptor: si la API devuelve 401 (token expirado), redirige al login
+// Interceptor: maneja errores de autenticación y trial expirado
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
       localStorage.removeItem('usuario');
+      localStorage.removeItem('tenant');
       window.location.href = '/login';
+    }
+    if (error.response?.status === 402) {
+      // Trial expirado - redirigir a página de upgrade
+      window.location.href = '/trial-expirado';
     }
     return Promise.reject(error);
   }
@@ -38,6 +43,19 @@ export const authService = {
 
   register: (data: { nombreUsuario: string; nombreCompleto: string; email: string; contraseña: string }) =>
     api.post('/auth/register', { NombreUsuario: data.nombreUsuario, NombreCompleto: data.nombreCompleto, Email: data.email, 'Contraseña': data.contraseña }),
+
+  registroNegocio: (data: {
+    nombreUsuario: string; nombreCompleto: string; email: string;
+    contraseña: string; nombreNegocio: string; telefono?: string;
+  }) =>
+    api.post('/auth/registro-negocio', {
+      NombreUsuario: data.nombreUsuario,
+      NombreCompleto: data.nombreCompleto,
+      Email: data.email,
+      'Contraseña': data.contraseña,
+      NombreNegocio: data.nombreNegocio,
+      Telefono: data.telefono,
+    }),
 };
 
 // ============================================
@@ -140,6 +158,29 @@ export const configuracionService = {
   testWhatsApp: () => api.get('/configuracion/whatsapp/test'),
   alertaStockBajo: () => api.get('/configuracion/whatsapp/stock-bajo'),
   resumenCierreCaja: (cajaId: number) => api.get(`/configuracion/whatsapp/cierre-caja/${cajaId}`),
+};
+
+// ============================================
+// TENANT SETTINGS (Mi Negocio)
+// ============================================
+export const tenantSettingsService = {
+  obtenerMiNegocio: () => api.get('/tenantsettings/mi-negocio'),
+  actualizarMiNegocio: (data: { nombreNegocio: string; emailContacto?: string; telefono?: string }) =>
+    api.put('/tenantsettings/mi-negocio', data),
+  obtenerPlan: () => api.get('/tenantsettings/plan'),
+};
+
+// ============================================
+// SUPER ADMIN
+// ============================================
+export const superAdminService = {
+  dashboard: () => api.get('/superadmin/dashboard'),
+  obtenerTenants: () => api.get('/superadmin/tenants'),
+  obtenerTenant: (tenantId: string) => api.get(`/superadmin/tenants/${tenantId}`),
+  cambiarEstadoTenant: (tenantId: string, activo: boolean) =>
+    api.put(`/superadmin/tenants/${tenantId}/activar?activo=${activo}`),
+  cambiarPlan: (tenantId: string, plan: string) =>
+    api.put(`/superadmin/tenants/${tenantId}/plan`, { plan }),
 };
 
 export default api;

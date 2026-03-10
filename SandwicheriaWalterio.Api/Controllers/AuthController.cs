@@ -61,7 +61,10 @@ namespace SandwicheriaWalterio.Api.Controllers
 
             var token = _jwtService.GenerarToken(usuario.UsuarioID, usuario.NombreUsuario, usuario.Rol, usuario.TenantId);
 
-            return Ok(new LoginResponse
+            // Buscar info del tenant
+            var tenant = _db.Tenants.FirstOrDefault(t => t.TenantId == usuario.TenantId);
+
+            return Ok(new LoginResponseSaaS
             {
                 Exitoso = true,
                 Token = token,
@@ -73,12 +76,21 @@ namespace SandwicheriaWalterio.Api.Controllers
                     NombreCompleto = usuario.NombreCompleto,
                     Rol = usuario.Rol,
                     Email = usuario.Email
-                }
+                },
+                Tenant = tenant != null ? new TenantInfo
+                {
+                    TenantId = tenant.TenantId,
+                    NombreNegocio = tenant.NombreNegocio,
+                    Plan = tenant.Plan,
+                    Activo = tenant.Activo,
+                    DiasRestantesTrial = tenant.DiasRestantesTrial,
+                    TrialExpirado = tenant.TrialExpirado
+                } : null
             });
         }
 
         /// <summary>
-        /// POST /api/auth/register
+        /// POST /api/auth/register (registro interno - agrega empleado al tenant actual)
         /// </summary>
         [HttpPost("register")]
         public IActionResult Register([FromBody] RegisterRequest request)
@@ -105,12 +117,28 @@ namespace SandwicheriaWalterio.Api.Controllers
             _db.Usuarios.Add(usuario);
             _db.SaveChangesWithoutFilters();
 
+            // Crear registro de Tenant en la plataforma
+            var tenant = new Tenant
+            {
+                TenantId = tenantId,
+                NombreNegocio = request.NombreCompleto, // Nombre por defecto
+                Plan = "Trial",
+                Activo = true,
+                FechaCreacion = DateTime.UtcNow,
+                FechaExpiracionTrial = DateTime.UtcNow.AddDays(7),
+                EmailContacto = request.Email,
+                UsuarioDueñoID = usuario.UsuarioID
+            };
+
+            _db.Tenants.Add(tenant);
+            _db.SaveChangesWithoutFilters();
+
             // Crear categorias por defecto para el nuevo tenant
             CrearDatosIniciales(tenantId);
 
             var token = _jwtService.GenerarToken(usuario.UsuarioID, usuario.NombreUsuario, usuario.Rol, tenantId);
 
-            return Ok(new LoginResponse
+            return Ok(new LoginResponseSaaS
             {
                 Exitoso = true,
                 Token = token,
@@ -122,6 +150,96 @@ namespace SandwicheriaWalterio.Api.Controllers
                     NombreCompleto = usuario.NombreCompleto,
                     Rol = usuario.Rol,
                     Email = usuario.Email
+                },
+                Tenant = new TenantInfo
+                {
+                    TenantId = tenantId,
+                    NombreNegocio = tenant.NombreNegocio,
+                    Plan = tenant.Plan,
+                    Activo = tenant.Activo,
+                    DiasRestantesTrial = tenant.DiasRestantesTrial,
+                    TrialExpirado = false
+                }
+            });
+        }
+
+        /// <summary>
+        /// POST /api/auth/registro-negocio (registro público SaaS con datos del negocio)
+        /// </summary>
+        [HttpPost("registro-negocio")]
+        public IActionResult RegistroNegocio([FromBody] TenantRegisterRequest request)
+        {
+            // Verificar si el nombre de usuario ya existe
+            if (_db.Usuarios.IgnoreQueryFilters().Any(u => u.NombreUsuario == request.NombreUsuario))
+                return BadRequest(new { error = "El nombre de usuario ya existe" });
+
+            // Verificar email duplicado
+            if (!string.IsNullOrEmpty(request.Email) &&
+                _db.Usuarios.IgnoreQueryFilters().Any(u => u.Email == request.Email))
+                return BadRequest(new { error = "El email ya está registrado" });
+
+            // Generar TenantId unico
+            var tenantId = Guid.NewGuid().ToString("N")[..12];
+
+            // Crear usuario dueño
+            var usuario = new Usuario
+            {
+                NombreUsuario = request.NombreUsuario,
+                NombreCompleto = request.NombreCompleto,
+                Email = request.Email,
+                Contraseña = BCrypt.Net.BCrypt.HashPassword(request.Contraseña),
+                Rol = "Dueño",
+                Activo = true,
+                FechaCreacion = DateTime.UtcNow,
+                TenantId = tenantId
+            };
+
+            _db.Usuarios.Add(usuario);
+            _db.SaveChangesWithoutFilters();
+
+            // Crear registro de Tenant
+            var tenant = new Tenant
+            {
+                TenantId = tenantId,
+                NombreNegocio = request.NombreNegocio,
+                Plan = "Trial",
+                Activo = true,
+                FechaCreacion = DateTime.UtcNow,
+                FechaExpiracionTrial = DateTime.UtcNow.AddDays(7),
+                EmailContacto = request.Email,
+                Telefono = request.Telefono,
+                UsuarioDueñoID = usuario.UsuarioID
+            };
+
+            _db.Tenants.Add(tenant);
+            _db.SaveChangesWithoutFilters();
+
+            // Crear categorias por defecto
+            CrearDatosIniciales(tenantId);
+
+            var token = _jwtService.GenerarToken(usuario.UsuarioID, usuario.NombreUsuario, usuario.Rol, tenantId);
+
+            return Ok(new LoginResponseSaaS
+            {
+                Exitoso = true,
+                Token = token,
+                Mensaje = "Negocio registrado exitosamente. Tenés 7 días de prueba gratis.",
+                Usuario = new UsuarioInfo
+                {
+                    UsuarioID = usuario.UsuarioID,
+                    NombreUsuario = usuario.NombreUsuario,
+                    NombreCompleto = usuario.NombreCompleto,
+                    Rol = usuario.Rol,
+                    Email = usuario.Email
+                },
+                Tenant = new TenantInfo
+                {
+                    TenantId = tenantId,
+                    NombreNegocio = tenant.NombreNegocio,
+                    Plan = "Trial",
+                    Activo = true,
+                    DiasRestantesTrial = 7,
+                    TrialExpirado = false
                 }
             });
         }

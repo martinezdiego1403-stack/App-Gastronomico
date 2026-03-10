@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import {
   FiShoppingCart, FiGrid, FiPackage, FiBookOpen,
   FiBarChart2, FiUsers, FiLogOut, FiDollarSign, FiSettings,
+  FiHome, FiActivity,
 } from 'react-icons/fi';
 
 interface NavItem {
@@ -20,18 +21,27 @@ const navItems: NavItem[] = [
   { to: '/mercaderia', icon: <FiPackage />, label: 'Mercaderia' },
   { to: '/recetas', icon: <FiBookOpen />, label: 'Recetas' },
   { to: '/reportes', icon: <FiBarChart2 />, label: 'Reportes' },
-  { to: '/usuarios', icon: <FiUsers />, label: 'Usuarios', rolesPermitidos: ['Dueno'] },
+  { to: '/usuarios', icon: <FiUsers />, label: 'Usuarios', rolesPermitidos: ['Dueño', 'Dueno'] },
+  { to: '/mi-negocio', icon: <FiHome />, label: 'Mi Negocio', rolesPermitidos: ['Dueño', 'Dueno'] },
   { to: '/configuracion', icon: <FiSettings />, label: 'Configuracion' },
 ];
 
+const superAdminNavItems: NavItem[] = [
+  { to: '/admin/dashboard', icon: <FiActivity />, label: 'Dashboard' },
+  { to: '/admin/tenants', icon: <FiUsers />, label: 'Negocios' },
+];
+
 export default function Layout() {
-  const { usuario, logout } = useAuth();
+  const { usuario, tenant, logout, isSuperAdmin } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
+
+  const businessName = tenant?.nombreNegocio || 'La Sandwicheria';
+  const items = isSuperAdmin ? superAdminNavItems : navItems;
 
   return (
     <div className="app-layout">
@@ -40,11 +50,18 @@ export default function Layout() {
         <div className="header-left">
           <span className="header-logo" role="img" aria-label="logo">&#x1F96A;</span>
           <div>
-            <h1 className="header-title">La Sandwicheria</h1>
-            <span className="header-sub">Sistema de Gestion</span>
+            <h1 className="header-title">{businessName}</h1>
+            <span className="header-sub">
+              {isSuperAdmin ? 'Panel de Administracion' : 'Sistema de Gestion'}
+            </span>
           </div>
         </div>
         <div className="header-right">
+          {tenant?.esTrial !== false && tenant?.diasRestantesTrial != null && tenant.diasRestantesTrial <= 3 && !isSuperAdmin && (
+            <div className="trial-warning">
+              {tenant.diasRestantesTrial} dias restantes
+            </div>
+          )}
           <div className="header-user">
             <span className="user-name">{usuario?.nombreCompleto || usuario?.nombreUsuario}</span>
             <span className="user-role">{usuario?.rol}</span>
@@ -59,7 +76,7 @@ export default function Layout() {
         {/* Sidebar */}
         <nav className="app-sidebar">
           <ul className="nav-list">
-            {navItems
+            {items
               .filter(item => !item.rolesPermitidos || item.rolesPermitidos.includes(usuario?.rol || ''))
               .map(item => (
                 <li key={item.to}>
@@ -75,7 +92,7 @@ export default function Layout() {
           </ul>
 
           <div className="sidebar-footer">
-            <span>La Sandwicheria</span>
+            <span>{businessName}</span>
             <span>v2.0 SaaS</span>
           </div>
         </nav>

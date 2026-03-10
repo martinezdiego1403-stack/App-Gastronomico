@@ -8,6 +8,7 @@ using SandwicheriaWalterio.Api.Data.Repositories;
 using SandwicheriaWalterio.Api.Middleware;
 using SandwicheriaWalterio.Api.Services;
 using SandwicheriaWalterio.Interfaces;
+using SandwicheriaWalterio.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -128,11 +129,56 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Migración automática de la base de datos
+// Migración automática de la base de datos + seed SuperAdmin
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApiDbContext>();
     db.Database.EnsureCreated();
+
+    // Seed: crear SuperAdmin si no existe
+    if (!db.Usuarios.IgnoreQueryFilters().Any(u => u.Rol == "SuperAdmin"))
+    {
+        var superAdmin = new Usuario
+        {
+            NombreUsuario = "superadmin",
+            NombreCompleto = "Administrador de Plataforma",
+            Email = "admin@lasandwicheria.com",
+            Contraseña = BCrypt.Net.BCrypt.HashPassword("admin2026"),
+            Rol = "SuperAdmin",
+            Activo = true,
+            FechaCreacion = DateTime.UtcNow,
+            TenantId = "platform" // TenantId reservado para SuperAdmin
+        };
+        db.Usuarios.Add(superAdmin);
+        db.SaveChanges();
+        Console.WriteLine("  [SEED] SuperAdmin creado: superadmin / admin2026");
+    }
+
+    // Seed: crear Tenant para el usuario diego existente si no tiene
+    var tenantsExistentes = db.Tenants.Select(t => t.TenantId).ToList();
+    var usuariosSinTenant = db.Usuarios.IgnoreQueryFilters()
+        .Where(u => u.Rol == "Dueño" && u.TenantId != "platform" && u.TenantId != "local")
+        .ToList();
+
+    foreach (var usuario in usuariosSinTenant)
+    {
+        if (!tenantsExistentes.Contains(usuario.TenantId))
+        {
+            db.Tenants.Add(new Tenant
+            {
+                TenantId = usuario.TenantId,
+                NombreNegocio = "La Sandwicheria",
+                Plan = "Trial",
+                Activo = true,
+                FechaCreacion = usuario.FechaCreacion,
+                FechaExpiracionTrial = DateTime.UtcNow.AddDays(30), // 30 días extra para existentes
+                EmailContacto = usuario.Email,
+                UsuarioDueñoID = usuario.UsuarioID
+            });
+            Console.WriteLine($"  [SEED] Tenant creado para usuario {usuario.NombreUsuario} ({usuario.TenantId})");
+        }
+    }
+    db.SaveChanges();
 }
 
 // Swagger (siempre habilitado por ahora)
