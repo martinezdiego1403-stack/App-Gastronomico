@@ -2079,8 +2079,8 @@ select:focus { border-color: var(--accent-primary); }
 
 /* Logo imagen */
 .header-logo-img {
-  width: 44px;
-  height: 44px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
   object-fit: contain;
 }
