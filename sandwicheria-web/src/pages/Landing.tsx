@@ -16,13 +16,26 @@ const planes = [
     periodo: '7 dias',
     features: ['Todas las funciones', '1 usuario', 'Datos en la nube', 'Soporte basico'],
     destacado: false,
+    crypto: null,
+    botonTexto: 'Empezar gratis',
   },
   {
-    nombre: 'Pro',
-    precio: '$14.999',
-    periodo: '/mes',
-    features: ['Todas las funciones', 'Usuarios ilimitados', 'App de escritorio', 'Soporte prioritario', 'Backup diario'],
+    nombre: 'Mensual (Web)',
+    precio: '$35',
+    periodo: 'USD/mes',
+    features: ['Acceso completo via web', 'Usuarios ilimitados', 'Soporte prioritario', 'Backup diario', 'Actualizaciones incluidas'],
     destacado: true,
+    crypto: '29 USDT/mes',
+    botonTexto: 'Elegir Mensual',
+  },
+  {
+    nombre: 'De por vida (App)',
+    precio: '$380',
+    periodo: 'USD pago unico',
+    features: ['App de escritorio para siempre', 'Sin pagos mensuales', 'Usuarios ilimitados', 'Soporte de por vida', 'Todas las actualizaciones'],
+    destacado: false,
+    crypto: '380 USDT pago unico',
+    botonTexto: 'Comprar App',
   },
 ];
 
@@ -113,6 +126,11 @@ export default function Landing() {
                 <span className="price-amount">{plan.precio}</span>
                 <span className="price-period">{plan.periodo}</span>
               </div>
+              {plan.crypto && (
+                <div className="pricing-crypto">
+                  o {plan.crypto}
+                </div>
+              )}
               <ul className="pricing-features">
                 {plan.features.map((f, j) => (
                   <li key={j}><FiCheck /> {f}</li>
@@ -122,7 +140,7 @@ export default function Landing() {
                 className={plan.destacado ? 'btn-primary' : 'btn-ghost'}
                 onClick={() => navigate('/registro')}
               >
-                {plan.destacado ? 'Elegir Pro' : 'Empezar gratis'}
+                {plan.botonTexto}
               </button>
             </motion.div>
           ))}
