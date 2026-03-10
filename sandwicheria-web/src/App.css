@@ -2079,6 +2079,20 @@ select:focus { border-color: var(--accent-primary); }
   font-weight: 600;
 }
 
+/* Logo imagen */
+.header-logo-img {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  object-fit: contain;
+}
+
+.login-logo-img {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+}
+
 /* Page loading */
 .page-loading {
   display: flex;

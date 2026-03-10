@@ -15,20 +15,20 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { to: '/caja', icon: <FiDollarSign />, label: 'Caja' },
-  { to: '/ventas', icon: <FiShoppingCart />, label: 'Punto de Venta' },
-  { to: '/menu', icon: <FiGrid />, label: 'Menu' },
-  { to: '/mercaderia', icon: <FiPackage />, label: 'Mercaderia' },
-  { to: '/recetas', icon: <FiBookOpen />, label: 'Recetas' },
-  { to: '/reportes', icon: <FiBarChart2 />, label: 'Reportes' },
-  { to: '/usuarios', icon: <FiUsers />, label: 'Usuarios', rolesPermitidos: ['Dueño', 'Dueno'] },
-  { to: '/mi-negocio', icon: <FiHome />, label: 'Mi Negocio', rolesPermitidos: ['Dueño', 'Dueno'] },
-  { to: '/configuracion', icon: <FiSettings />, label: 'Configuracion' },
+  { to: '/app/caja', icon: <FiDollarSign />, label: 'Caja' },
+  { to: '/app/ventas', icon: <FiShoppingCart />, label: 'Punto de Venta' },
+  { to: '/app/menu', icon: <FiGrid />, label: 'Menu' },
+  { to: '/app/mercaderia', icon: <FiPackage />, label: 'Mercaderia' },
+  { to: '/app/recetas', icon: <FiBookOpen />, label: 'Recetas' },
+  { to: '/app/reportes', icon: <FiBarChart2 />, label: 'Reportes' },
+  { to: '/app/usuarios', icon: <FiUsers />, label: 'Usuarios', rolesPermitidos: ['Dueño', 'Dueno'] },
+  { to: '/app/mi-negocio', icon: <FiHome />, label: 'Mi Negocio', rolesPermitidos: ['Dueño', 'Dueno'] },
+  { to: '/app/configuracion', icon: <FiSettings />, label: 'Configuracion' },
 ];
 
 const superAdminNavItems: NavItem[] = [
-  { to: '/admin/dashboard', icon: <FiActivity />, label: 'Dashboard' },
-  { to: '/admin/tenants', icon: <FiUsers />, label: 'Negocios' },
+  { to: '/app/admin/dashboard', icon: <FiActivity />, label: 'Dashboard' },
+  { to: '/app/admin/tenants', icon: <FiUsers />, label: 'Negocios' },
 ];
 
 export default function Layout() {
@@ -37,10 +37,10 @@ export default function Layout() {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate('/');
   };
 
-  const businessName = tenant?.nombreNegocio || 'La Sandwicheria';
+  const businessName = tenant?.nombreNegocio || 'GastronomiApp';
   const items = isSuperAdmin ? superAdminNavItems : navItems;
 
   return (
@@ -48,7 +48,7 @@ export default function Layout() {
       {/* Header */}
       <header className="app-header">
         <div className="header-left">
-          <span className="header-logo" role="img" aria-label="logo">&#x1F96A;</span>
+          <img src="/logo.png" alt="GastronomiApp" className="header-logo-img" />
           <div>
             <h1 className="header-title">{businessName}</h1>
             <span className="header-sub">

@@ -56,7 +56,7 @@ export default function Registro() {
       if (data.exitoso) {
         // Guardar token y datos, luego redirigir al dashboard
         loginWithToken(data.token, data.usuario, data.tenant);
-        navigate('/');
+        navigate('/app');
       } else {
         setError(data.mensaje || 'Error al registrar');
       }
@@ -83,7 +83,7 @@ export default function Registro() {
       >
         <div className="login-logo">
           <div className="logo-icon">
-            <span role="img" aria-label="sandwich">&#x1F96A;</span>
+            <img src="/logo.png" alt="GastronomiApp" className="login-logo-img" />
           </div>
           <h1 className="logo-title">Registra tu negocio</h1>
           <p className="logo-subtitle">7 dias de prueba gratis</p>

@@ -34,8 +34,8 @@ export default function Landing() {
       {/* Header */}
       <header className="landing-header">
         <div className="landing-header-left">
-          <span className="header-logo" role="img" aria-label="logo">&#x1F96A;</span>
-          <span className="landing-brand">La Sandwicheria</span>
+          <img src="/logo.png" alt="GastronomiApp" className="header-logo-img" />
+          <span className="landing-brand">GastronomiApp</span>
         </div>
         <div className="landing-header-right">
           <button className="btn-ghost" onClick={() => navigate('/login')}>
@@ -131,7 +131,7 @@ export default function Landing() {
 
       {/* Footer */}
       <footer className="landing-footer">
-        <span>La Sandwicheria &copy; 2026 - Sistema de Gestion Gastronomica</span>
+        <span>GastronomiApp &copy; 2026 - Sistema de Gestion Gastronomica</span>
       </footer>
     </div>
   );

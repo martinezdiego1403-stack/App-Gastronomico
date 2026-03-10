@@ -22,7 +22,7 @@ export default function Login() {
     setLoading(true);
     try {
       await login(nombreUsuario, contrasena);
-      navigate('/');
+      navigate('/app');
     } catch (err: any) {
       setError(err.message || err.response?.data?.error || 'Error al iniciar sesion');
     } finally {
@@ -47,9 +47,9 @@ export default function Login() {
         {/* Logo */}
         <div className="login-logo">
           <div className="logo-icon">
-            <span role="img" aria-label="sandwich">&#x1F96A;</span>
+            <img src="/logo.png" alt="GastronomiApp" className="login-logo-img" />
           </div>
-          <h1 className="logo-title">La Sandwicheria</h1>
+          <h1 className="logo-title">GastronomiApp</h1>
           <p className="logo-subtitle">Sistema de Gestion</p>
         </div>
 

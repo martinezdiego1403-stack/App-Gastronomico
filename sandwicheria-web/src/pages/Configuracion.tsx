@@ -6,7 +6,7 @@ import { FiSettings, FiSave, FiSend, FiAlertTriangle, FiCheckCircle, FiSmartphon
 export default function Configuracion() {
   const [numero, setNumero] = useState('');
   const [habilitado, setHabilitado] = useState(false);
-  const [nombreNegocio, setNombreNegocio] = useState('La Sandwicheria');
+  const [nombreNegocio, setNombreNegocio] = useState('GastronomiApp');
   const [loading, setLoading] = useState(true);
   const [mensaje, setMensaje] = useState('');
   const [tipoMensaje, setTipoMensaje] = useState<'success' | 'error' | ''>('');
@@ -23,7 +23,7 @@ export default function Configuracion() {
       ]);
       setNumero(configRes.data.whatsAppNumero || '');
       setHabilitado(configRes.data.whatsAppHabilitado || false);
-      setNombreNegocio(configRes.data.nombreNegocio || 'La Sandwicheria');
+      setNombreNegocio(configRes.data.nombreNegocio || 'GastronomiApp');
       setStockBajoCount(Array.isArray(stockRes.data) ? stockRes.data.length : 0);
     } catch {} finally { setLoading(false); }
   };
@@ -119,7 +119,7 @@ export default function Configuracion() {
               <input
                 value={nombreNegocio}
                 onChange={e => setNombreNegocio(e.target.value)}
-                placeholder="Ej: La Sandwicheria"
+                placeholder="Ej: GastronomiApp"
               />
             </div>
             <div className="form-group">

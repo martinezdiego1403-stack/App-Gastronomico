@@ -34,15 +34,16 @@ function AppRoutes() {
 
   return (
     <Routes>
-      {/* Rutas publicas */}
-      <Route path="/landing" element={isAuthenticated ? <Navigate to="/" /> : <Landing />} />
-      <Route path="/login" element={isAuthenticated ? <Navigate to="/" /> : <Login />} />
-      <Route path="/registro" element={isAuthenticated ? <Navigate to="/" /> : <Registro />} />
+      {/* Ruta principal: landing si no esta logueado, dashboard si lo esta */}
+      <Route path="/" element={isAuthenticated ? <Navigate to="/app" /> : <Landing />} />
+      <Route path="/landing" element={isAuthenticated ? <Navigate to="/app" /> : <Landing />} />
+      <Route path="/login" element={isAuthenticated ? <Navigate to="/app" /> : <Login />} />
+      <Route path="/registro" element={isAuthenticated ? <Navigate to="/app" /> : <Registro />} />
       <Route path="/trial-expirado" element={<TrialExpirado />} />
 
       {/* Rutas protegidas - App POS */}
-      <Route path="/" element={<PrivateRoute><Layout /></PrivateRoute>}>
-        <Route index element={<Navigate to={isSuperAdmin ? '/admin/dashboard' : '/caja'} />} />
+      <Route path="/app" element={<PrivateRoute><Layout /></PrivateRoute>}>
+        <Route index element={<Navigate to={isSuperAdmin ? '/app/admin/dashboard' : '/app/caja'} />} />
         <Route path="caja" element={<Caja />} />
         <Route path="ventas" element={<Ventas />} />
         <Route path="menu" element={<Menu />} />
@@ -62,8 +63,8 @@ function AppRoutes() {
         } />
       </Route>
 
-      {/* Fallback: usuarios no logueados van a landing, logueados al dashboard */}
-      <Route path="*" element={<Navigate to={isAuthenticated ? '/' : '/landing'} />} />
+      {/* Fallback */}
+      <Route path="*" element={<Navigate to={isAuthenticated ? '/app' : '/'} />} />
     </Routes>
   );
 }
