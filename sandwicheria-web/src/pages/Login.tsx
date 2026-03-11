@@ -2,7 +2,8 @@ import { useState, FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { motion } from 'framer-motion';
-import { FiUser, FiLock, FiLogIn } from 'react-icons/fi';
+import { FiUser, FiLock, FiLogIn, FiSun, FiMoon } from 'react-icons/fi';
+import { useTheme } from '../context/ThemeContext';
 
 export default function Login() {
   const [nombreUsuario, setNombreUsuario] = useState('');
@@ -11,6 +12,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -32,6 +34,9 @@ export default function Login() {
 
   return (
     <div className="login-page">
+      <button className="login-theme-toggle" onClick={toggleTheme} title={theme === 'light' ? 'Modo oscuro' : 'Modo claro'}>
+        {theme === 'light' ? <FiMoon /> : <FiSun />}
+      </button>
       <div className="login-bg-shapes">
         <div className="shape shape-1" />
         <div className="shape shape-2" />

@@ -3,7 +3,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { authService } from '../services/api';
 import { motion } from 'framer-motion';
-import { FiUser, FiLock, FiMail, FiPhone, FiHome, FiArrowRight } from 'react-icons/fi';
+import { FiUser, FiLock, FiMail, FiPhone, FiHome, FiArrowRight, FiSun, FiMoon } from 'react-icons/fi';
+import { useTheme } from '../context/ThemeContext';
 
 export default function Registro() {
   const [form, setForm] = useState({
@@ -19,6 +20,7 @@ export default function Registro() {
   const [loading, setLoading] = useState(false);
   const { loginWithToken } = useAuth();
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
 
   const handleChange = (field: string, value: string) => {
     setForm(prev => ({ ...prev, [field]: value }));
@@ -61,7 +63,12 @@ export default function Registro() {
         setError(data.mensaje || 'Error al registrar');
       }
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Error al registrar el negocio');
+      const msg = err.response?.data?.error
+        || err.response?.data?.mensaje
+        || err.response?.data?.title
+        || err.message
+        || 'Error al registrar el negocio';
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -69,6 +76,9 @@ export default function Registro() {
 
   return (
     <div className="login-page">
+      <button className="login-theme-toggle" onClick={toggleTheme} title={theme === 'light' ? 'Modo oscuro' : 'Modo claro'}>
+        {theme === 'light' ? <FiMoon /> : <FiSun />}
+      </button>
       <div className="login-bg-shapes">
         <div className="shape shape-1" />
         <div className="shape shape-2" />

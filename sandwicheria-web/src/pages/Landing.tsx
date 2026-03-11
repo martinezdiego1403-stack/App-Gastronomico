@@ -1,64 +1,35 @@
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FiCheck, FiArrowRight, FiShoppingCart, FiBarChart2, FiPackage, FiSmartphone, FiStar } from 'react-icons/fi';
-
-// ============================================
-// DATA
-// ============================================
+import { FiCheck, FiArrowRight, FiShoppingCart, FiBarChart2, FiPackage, FiSmartphone, FiStar, FiSun, FiMoon, FiPrinter } from 'react-icons/fi';
+import { useTheme } from '../context/ThemeContext';
 
 const features = [
-  { icon: <FiShoppingCart />, title: 'Punto de Venta', desc: 'Vende rapido con carrito, codigo de barras y multiples metodos de pago.' },
-  { icon: <FiPackage />, title: 'Stock Inteligente', desc: 'Control de mercaderia con unidades de medida, recetas y descuento automatico.' },
-  { icon: <FiBarChart2 />, title: 'Reportes', desc: 'Ventas por dia, productos mas vendidos, exportacion a Excel.' },
-  { icon: <FiSmartphone />, title: 'Alertas WhatsApp', desc: 'Recibi alertas de stock bajo y resumen de caja en tu celular.' },
+  { icon: <FiShoppingCart />, title: 'Punto de Venta', desc: 'Carrito, codigo de barras y multiples metodos de pago.' },
+  { icon: <FiPackage />, title: 'Stock Inteligente', desc: 'Unidades de medida, recetas y descuento automatico.' },
+  { icon: <FiBarChart2 />, title: 'Reportes', desc: 'Ventas por dia, productos top, exportacion Excel.' },
+  { icon: <FiSmartphone />, title: 'Alertas WhatsApp', desc: 'Stock bajo y resumen de caja en tu celular.' },
+  { icon: <FiPrinter />, title: 'Impresion de Tickets', desc: 'Tickets y facturas en impresora termica 58mm.' },
 ];
 
 const planes = [
-  {
-    nombre: 'Prueba Gratis',
-    precio: '$0',
-    periodo: '7 dias',
-    features: ['Todas las funciones', '1 usuario', 'Datos en la nube', 'Soporte basico'],
-    destacado: false,
-    crypto: null,
-    botonTexto: 'Empezar gratis',
-  },
-  {
-    nombre: 'Mensual (Web)',
-    precio: '$35',
-    periodo: 'USD/mes',
-    features: ['Acceso completo via web', 'Usuarios ilimitados', 'Soporte prioritario', 'Backup diario', 'Actualizaciones incluidas'],
-    destacado: true,
-    crypto: '29 USDT/mes',
-    botonTexto: 'Elegir Mensual',
-  },
-  {
-    nombre: 'De por vida (App)',
-    precio: '$380',
-    periodo: 'USD pago unico',
-    features: ['App de escritorio para siempre', 'Sin pagos mensuales', 'Usuarios ilimitados', 'Soporte de por vida', 'Todas las actualizaciones'],
-    destacado: false,
-    crypto: '380 USDT pago unico',
-    botonTexto: 'Comprar App',
-  },
+  { nombre: 'Prueba Gratis', precio: '$0', periodo: '7 dias', features: ['Todas las funciones', '1 usuario', 'Datos en la nube', 'Soporte basico'], destacado: false, crypto: null, botonTexto: 'Empezar gratis' },
+  { nombre: 'Mensual (Web)', precio: '$35', periodo: 'USD/mes', features: ['Acceso completo via web', 'Usuarios ilimitados', 'Soporte prioritario', 'Backup diario', 'Actualizaciones incluidas'], destacado: true, crypto: '29 USDT/mes', botonTexto: 'Elegir Mensual' },
+  { nombre: 'De por vida (App)', precio: '$380', periodo: 'USD pago unico', features: ['App de escritorio para siempre', 'Sin pagos mensuales', 'Usuarios ilimitados', 'Soporte de por vida', 'Todas las actualizaciones'], destacado: false, crypto: '380 USDT pago unico', botonTexto: 'Comprar App' },
 ];
 
-const testimonials = [
-  { name: 'Carlos M.', role: 'Sandwicheria Don Pepe', text: 'Desde que uso GastronomiApp mis ventas estan organizadas y el stock se controla solo.' },
-  { name: 'Laura S.', role: 'Pizzeria La Nona', text: 'Las recetas se descuentan automaticamente del inventario. Me ahorra horas de trabajo.' },
-  { name: 'Diego R.', role: 'Bar El Clasico', text: 'Los reportes me ayudan a saber que productos rinden mas. Muy recomendable.' },
+const testimonios = [
+  { nombre: 'Carlos M.', negocio: 'Sandwicheria Don Pepe', texto: 'Desde que uso GastronomiApp, tengo todo organizado. Las alertas de stock me salvan la vida.', estrellas: 5 },
+  { nombre: 'Laura G.', negocio: 'Pizzeria La Esquina', texto: 'Super facil de usar. Mis empleados aprendieron en 10 minutos. Los reportes son geniales.', estrellas: 5 },
+  { nombre: 'Martin R.', negocio: 'Cafe Central', texto: 'El mejor sistema que probe. El control de recetas y descuento automatico es increible.', estrellas: 5 },
 ];
-
-// ============================================
-// MAIN LANDING
-// ============================================
 
 export default function Landing() {
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <div className="lt-landing">
-      {/* ===== NAVBAR ===== */}
+      {/* Navbar */}
       <header className="lt-navbar">
         <div className="lt-navbar-left">
           <img src="/logo.png" alt="GastronomiApp" className="lt-navbar-logo" />
@@ -67,86 +38,63 @@ export default function Landing() {
         <nav className="lt-navbar-links">
           <a href="#features">Funciones</a>
           <a href="#pricing">Planes</a>
-          <a href="#testimonials">Opiniones</a>
+          <a href="#testimonials">Testimonios</a>
         </nav>
         <div className="lt-navbar-right">
-          <button className="lt-btn-ghost" onClick={() => navigate('/login')}>Iniciar Sesion</button>
-          <button className="lt-btn-primary" onClick={() => navigate('/registro')}>
-            Probar Gratis <FiArrowRight />
+          <button className="lt-theme-toggle" onClick={toggleTheme} title={theme === 'light' ? 'Modo oscuro' : 'Modo claro'}>
+            {theme === 'light' ? <FiMoon /> : <FiSun />}
           </button>
+          <button className="lt-btn-ghost" onClick={() => navigate('/login')}>Iniciar Sesion</button>
+          <button className="lt-btn-primary" onClick={() => navigate('/registro')}>Probar Gratis</button>
         </div>
       </header>
 
-      {/* ===== HERO SECTION ===== */}
+      {/* Hero */}
       <section className="lt-hero">
-        <motion.div
-          className="lt-hero-text"
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7 }}
-        >
-          <h1 className="lt-hero-title">GESTION GASTRONOMICA.</h1>
-          <p className="lt-hero-subtitle">Tu negocio bajo control, simple y rapido</p>
+        <motion.div className="lt-hero-text" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+          <h1 className="lt-hero-title">Gestion gastronomica<br />simple y poderosa</h1>
+          <p className="lt-hero-subtitle">Todo lo que necesitas para manejar tu negocio: ventas, stock, recetas, reportes y mas.</p>
           <div className="lt-hero-actions">
             <button className="lt-btn-primary lt-btn-lg" onClick={() => navigate('/registro')}>
-              Empezar gratis por 7 dias <FiArrowRight />
+              Empezar gratis <FiArrowRight />
             </button>
             <button className="lt-btn-outline" onClick={() => navigate('/login')}>
               Ya tengo cuenta
             </button>
           </div>
-          <p className="lt-hero-note">Sin tarjeta de credito requerida</p>
+          <p className="lt-hero-note">7 dias gratis. Sin tarjeta de credito.</p>
         </motion.div>
 
-        <motion.div
-          className="lt-hero-image"
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-        >
-          <img src="/hero-food.png" alt="Comida gourmet - Pizza, Hamburguesas, Batidos" className="lt-hero-img" />
+        <motion.div className="lt-hero-image" initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.2 }}>
+          <img src="/hero-food.png" alt="GastronomiApp Dashboard" className="lt-hero-img" />
         </motion.div>
 
-        {/* Sparkle decoration */}
-        <div className="lt-sparkle lt-sparkle-1"><FiStar /></div>
-        <div className="lt-sparkle lt-sparkle-2"><FiStar /></div>
+        <FiStar className="lt-sparkle lt-sparkle-1" />
+        <FiStar className="lt-sparkle lt-sparkle-2" />
       </section>
 
-      {/* ===== BRANDS/TRUST BAR ===== */}
-      <section className="lt-trust-bar">
+      {/* Trust Bar */}
+      <div className="lt-trust-bar">
         <span>Punto de Venta</span>
-        <span className="lt-trust-dot" />
+        <div className="lt-trust-dot" />
         <span>Control de Stock</span>
-        <span className="lt-trust-dot" />
-        <span>Facturacion</span>
-        <span className="lt-trust-dot" />
+        <div className="lt-trust-dot" />
+        <span>Recetas</span>
+        <div className="lt-trust-dot" />
         <span>Reportes</span>
-        <span className="lt-trust-dot" />
-        <span>Multi-sucursal</span>
-      </section>
+        <div className="lt-trust-dot" />
+        <span>WhatsApp</span>
+      </div>
 
-      {/* ===== FEATURES ===== */}
+      {/* Features */}
       <section className="lt-features" id="features">
-        <motion.div
-          className="lt-section-header"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-        >
+        <div className="lt-section-header">
           <h2 className="lt-section-title">Todo lo que necesitas</h2>
-          <p className="lt-section-subtitle">Herramientas profesionales para tu negocio gastronomico</p>
-        </motion.div>
-
+          <p className="lt-section-subtitle">Herramientas pensadas para gastronomia</p>
+        </div>
         <div className="lt-features-grid">
           {features.map((f, i) => (
-            <motion.div
-              key={i}
-              className="lt-feature-card"
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.1, duration: 0.5 }}
-              viewport={{ once: true }}
-            >
+            <motion.div key={i} className="lt-feature-card" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} viewport={{ once: true }}>
               <div className="lt-feature-icon">{f.icon}</div>
               <h3>{f.title}</h3>
               <p>{f.desc}</p>
@@ -155,93 +103,56 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ===== PRICING ===== */}
+      {/* Pricing */}
       <section className="lt-pricing" id="pricing">
-        <motion.div
-          className="lt-section-header"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-        >
-          <h2 className="lt-section-title">Planes simples, sin sorpresas</h2>
-          <p className="lt-section-subtitle">Elegi el plan que mejor se adapte a tu negocio</p>
-        </motion.div>
-
+        <div className="lt-section-header">
+          <h2 className="lt-section-title">Planes simples</h2>
+          <p className="lt-section-subtitle">Sin letra chica. Cancela cuando quieras.</p>
+        </div>
         <div className="lt-pricing-grid">
           {planes.map((plan, i) => (
-            <motion.div
-              key={i}
-              className={`lt-pricing-card ${plan.destacado ? 'lt-pricing-featured' : ''}`}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.12, duration: 0.5 }}
-              viewport={{ once: true }}
-            >
-              {plan.destacado && <div className="lt-pricing-badge">Mas popular</div>}
-              <h3 className="lt-pricing-name">{plan.nombre}</h3>
+            <motion.div key={i} className={`lt-pricing-card ${plan.destacado ? 'lt-pricing-featured' : ''}`} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} viewport={{ once: true }}>
+              {plan.destacado && <div className="lt-pricing-badge">Popular</div>}
+              <div className="lt-pricing-name">{plan.nombre}</div>
               <div className="lt-pricing-price">
                 <span className="lt-price-amount">{plan.precio}</span>
                 <span className="lt-price-period">{plan.periodo}</span>
               </div>
               {plan.crypto && <div className="lt-pricing-crypto">o {plan.crypto}</div>}
               <ul className="lt-pricing-features">
-                {plan.features.map((f, j) => (
-                  <li key={j}><FiCheck /> {f}</li>
-                ))}
+                {plan.features.map((f, j) => <li key={j}><FiCheck /> {f}</li>)}
               </ul>
-              <button
-                className={plan.destacado ? 'lt-btn-primary lt-btn-full' : 'lt-btn-outline lt-btn-full'}
-                onClick={() => navigate('/registro')}
-              >
-                {plan.botonTexto}
-              </button>
+              <button className={plan.destacado ? 'lt-btn-primary lt-btn-full' : 'lt-btn-outline lt-btn-full'} onClick={() => navigate('/registro')}>{plan.botonTexto}</button>
             </motion.div>
           ))}
         </div>
       </section>
 
-      {/* ===== TESTIMONIALS ===== */}
+      {/* Testimonials */}
       <section className="lt-testimonials" id="testimonials">
-        <motion.div
-          className="lt-section-header"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-        >
+        <div className="lt-section-header">
           <h2 className="lt-section-title">Lo que dicen nuestros clientes</h2>
-        </motion.div>
-
+          <p className="lt-section-subtitle">Negocios reales usando GastronomiApp</p>
+        </div>
         <div className="lt-testimonials-grid">
-          {testimonials.map((t, i) => (
-            <motion.div
-              key={i}
-              className="lt-testimonial-card"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.1 }}
-              viewport={{ once: true }}
-            >
+          {testimonios.map((t, i) => (
+            <motion.div key={i} className="lt-testimonial-card" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} viewport={{ once: true }}>
               <div className="lt-testimonial-stars">
-                {[...Array(5)].map((_, j) => <FiStar key={j} />)}
+                {Array.from({ length: t.estrellas }).map((_, j) => <FiStar key={j} />)}
               </div>
-              <p className="lt-testimonial-text">"{t.text}"</p>
+              <p className="lt-testimonial-text">"{t.texto}"</p>
               <div className="lt-testimonial-author">
-                <strong>{t.name}</strong>
-                <span>{t.role}</span>
+                <strong>{t.nombre}</strong>
+                <span>{t.negocio}</span>
               </div>
             </motion.div>
           ))}
         </div>
       </section>
 
-      {/* ===== CTA ===== */}
+      {/* CTA */}
       <section className="lt-cta">
-        <motion.div
-          className="lt-cta-content"
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-        >
+        <motion.div className="lt-cta-content" initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }}>
           <h2>Listo para empezar?</h2>
           <p>Proba GastronomiApp gratis por 7 dias y lleva tu negocio al siguiente nivel.</p>
           <button className="lt-btn-primary lt-btn-xl" onClick={() => navigate('/registro')}>
@@ -250,14 +161,14 @@ export default function Landing() {
         </motion.div>
       </section>
 
-      {/* ===== FOOTER ===== */}
+      {/* Footer */}
       <footer className="lt-footer">
         <div className="lt-footer-left">
           <img src="/logo.png" alt="GastronomiApp" className="lt-footer-logo" />
           <span>GastronomiApp &copy; 2026</span>
         </div>
         <div className="lt-footer-right">
-          <span>admin@gastronomiapp.com</span>
+          admin@gastronomiapp.com
         </div>
       </footer>
     </div>
