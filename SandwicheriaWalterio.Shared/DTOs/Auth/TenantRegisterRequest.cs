@@ -23,7 +23,7 @@ namespace SandwicheriaWalterio.DTOs.Auth
 
         [Required]
         [MinLength(4)]
-        public string Contraseña { get; set; } = string.Empty;
+        public string Contrasena { get; set; } = string.Empty;
 
         // Datos del negocio
         [Required]

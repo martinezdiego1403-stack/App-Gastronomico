@@ -30,7 +30,7 @@ namespace SandwicheriaWalterio.DTOs.Usuarios
 
         [Required]
         [MinLength(4)]
-        public string Contraseña { get; set; } = string.Empty;
+        public string Contrasena { get; set; } = string.Empty;
 
         [Required]
         [MaxLength(20)]
@@ -58,13 +58,13 @@ namespace SandwicheriaWalterio.DTOs.Usuarios
         public string Rol { get; set; } = "Empleado";
     }
 
-    public class CambiarContraseñaDto
+    public class CambiarContrasenaDto
     {
         [Required]
         public int UsuarioID { get; set; }
 
         [Required]
         [MinLength(4)]
-        public string NuevaContraseña { get; set; } = string.Empty;
+        public string NuevaContrasena { get; set; } = string.Empty;
     }
 }

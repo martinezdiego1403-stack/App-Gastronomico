@@ -19,7 +19,7 @@ export default function Usuarios() {
 
   const [showForm, setShowForm] = useState(false);
   const [editando, setEditando] = useState<Usuario | null>(null);
-  const [form, setForm] = useState({ nombreUsuario: '', nombreCompleto: '', email: '', rol: 'Empleado', contraseña: '' });
+  const [form, setForm] = useState({ nombreUsuario: '', nombreCompleto: '', email: '', rol: 'Empleado', contrasena: '' });
 
   useEffect(() => { cargar(); }, []);
 
@@ -39,11 +39,11 @@ export default function Usuarios() {
         nombreCompleto: usr.nombreCompleto,
         email: usr.email || '',
         rol: usr.rol,
-        contraseña: '',
+        contrasena: '',
       });
     } else {
       setEditando(null);
-      setForm({ nombreUsuario: '', nombreCompleto: '', email: '', rol: 'Empleado', contraseña: '' });
+      setForm({ nombreUsuario: '', nombreCompleto: '', email: '', rol: 'Empleado', contrasena: '' });
     }
     setShowForm(true);
   };
@@ -58,7 +58,7 @@ export default function Usuarios() {
           Email: form.email,
           Rol: form.rol,
         };
-        if (form.contraseña) data['Contraseña'] = form.contraseña;
+        if (form.contrasena) data.Contrasena = form.contrasena;
         await usuariosService.actualizar(editando.usuarioID, data);
       } else {
         await usuariosService.crear({
@@ -66,7 +66,7 @@ export default function Usuarios() {
           NombreCompleto: form.nombreCompleto,
           Email: form.email,
           Rol: form.rol,
-          'Contraseña': form.contraseña,
+          Contrasena: form.contrasena,
         });
       }
       setShowForm(false);
@@ -195,7 +195,7 @@ export default function Usuarios() {
               </div>
               <div className="form-group">
                 <label>{editando ? 'Nueva Contrasena (dejar vacio para no cambiar)' : 'Contrasena'}</label>
-                <input type="password" value={form.contraseña} onChange={e => setForm({ ...form, contraseña: e.target.value })} />
+                <input type="password" value={form.contrasena} onChange={e => setForm({ ...form, contrasena: e.target.value })} />
               </div>
             </div>
             <div className="modal-actions">

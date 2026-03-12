@@ -11,8 +11,8 @@ export default function Registro() {
     nombreUsuario: '',
     nombreCompleto: '',
     email: '',
-    contraseña: '',
-    confirmarContraseña: '',
+    contrasena: '',
+    confirmarContrasena: '',
     nombreNegocio: '',
     telefono: '',
   });
@@ -30,15 +30,15 @@ export default function Registro() {
     e.preventDefault();
     setError('');
 
-    if (!form.nombreUsuario.trim() || !form.nombreCompleto.trim() || !form.email.trim() || !form.contraseña || !form.nombreNegocio.trim()) {
+    if (!form.nombreUsuario.trim() || !form.nombreCompleto.trim() || !form.email.trim() || !form.contrasena || !form.nombreNegocio.trim()) {
       setError('Completa todos los campos obligatorios');
       return;
     }
-    if (form.contraseña !== form.confirmarContraseña) {
+    if (form.contrasena !== form.confirmarContrasena) {
       setError('Las contraseñas no coinciden');
       return;
     }
-    if (form.contraseña.length < 4) {
+    if (form.contrasena.length < 4) {
       setError('La contraseña debe tener al menos 4 caracteres');
       return;
     }
@@ -49,7 +49,7 @@ export default function Registro() {
         nombreUsuario: form.nombreUsuario,
         nombreCompleto: form.nombreCompleto,
         email: form.email,
-        contraseña: form.contraseña,
+        contrasena: form.contrasena,
         nombreNegocio: form.nombreNegocio,
         telefono: form.telefono || undefined,
       });
@@ -160,8 +160,8 @@ export default function Registro() {
             <input
               type="password"
               placeholder="Contraseña *"
-              value={form.contraseña}
-              onChange={e => handleChange('contraseña', e.target.value)}
+              value={form.contrasena}
+              onChange={e => handleChange('contrasena', e.target.value)}
             />
           </div>
 
@@ -170,8 +170,8 @@ export default function Registro() {
             <input
               type="password"
               placeholder="Confirmar contraseña *"
-              value={form.confirmarContraseña}
-              onChange={e => handleChange('confirmarContraseña', e.target.value)}
+              value={form.confirmarContrasena}
+              onChange={e => handleChange('confirmarContrasena', e.target.value)}
             />
           </div>
 

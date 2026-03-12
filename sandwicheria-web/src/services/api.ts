@@ -38,24 +38,24 @@ api.interceptors.response.use(
 // AUTH
 // ============================================
 export const authService = {
-  login: (nombreUsuario: string, contraseña: string) =>
-    api.post('/auth/login', { NombreUsuario: nombreUsuario, 'Contraseña': contraseña }),
+  login: (nombreUsuario: string, contrasena: string) =>
+    api.post('/auth/login', { NombreUsuario: nombreUsuario, Contrasena: contrasena }),
 
-  register: (data: { nombreUsuario: string; nombreCompleto: string; email: string; contraseña: string }) =>
-    api.post('/auth/register', { NombreUsuario: data.nombreUsuario, NombreCompleto: data.nombreCompleto, Email: data.email, 'Contraseña': data.contraseña }),
+  register: (data: { nombreUsuario: string; nombreCompleto: string; email: string; contrasena: string }) =>
+    api.post('/auth/register', { NombreUsuario: data.nombreUsuario, NombreCompleto: data.nombreCompleto, Email: data.email, Contrasena: data.contrasena }),
 
   loginEmpleado: (nombreUsuario: string, nombreNegocio: string) =>
     api.post('/auth/login-empleado', { NombreUsuario: nombreUsuario, NombreNegocio: nombreNegocio }),
 
   registroNegocio: (data: {
     nombreUsuario: string; nombreCompleto: string; email: string;
-    contraseña: string; nombreNegocio: string; telefono?: string;
+    contrasena: string; nombreNegocio: string; telefono?: string;
   }) =>
     api.post('/auth/registro-negocio', {
       NombreUsuario: data.nombreUsuario,
       NombreCompleto: data.nombreCompleto,
       Email: data.email,
-      'Contraseña': data.contraseña,
+      Contrasena: data.contrasena,
       NombreNegocio: data.nombreNegocio,
       Telefono: data.telefono,
     }),

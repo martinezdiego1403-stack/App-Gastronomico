@@ -48,7 +48,7 @@ namespace SandwicheriaWalterio.Api.Controllers
                 Rol = dto.Rol
             };
 
-            var id = _repo.Crear(usuario, dto.Contraseña);
+            var id = _repo.Crear(usuario, dto.Contrasena);
             return CreatedAtAction(nameof(ObtenerPorId), new { id }, new { usuarioId = id });
         }
 
@@ -81,13 +81,13 @@ namespace SandwicheriaWalterio.Api.Controllers
         public IActionResult Desbloquear(int id) =>
             _repo.DesbloquearUsuario(id) ? Ok(new { mensaje = "Usuario desbloqueado" }) : NotFound();
 
-        [HttpPut("{id}/cambiar-contraseña")]
-        public IActionResult CambiarContraseña(int id, [FromBody] CambiarContraseñaDto dto)
+        [HttpPut("{id}/cambiar-contrasena")]
+        public IActionResult CambiarContrasena(int id, [FromBody] CambiarContrasenaDto dto)
         {
             if (id != dto.UsuarioID)
                 return BadRequest(new { error = "ID no coincide" });
 
-            return _repo.CambiarContraseña(id, dto.NuevaContraseña) ? Ok(new { mensaje = "Contraseña actualizada" }) : NotFound();
+            return _repo.CambiarContraseña(id, dto.NuevaContrasena) ? Ok(new { mensaje = "Contrasena actualizada" }) : NotFound();
         }
 
         [HttpGet("historial-accesos")]

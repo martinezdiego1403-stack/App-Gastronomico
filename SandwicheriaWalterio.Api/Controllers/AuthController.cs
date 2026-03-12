@@ -42,7 +42,7 @@ namespace SandwicheriaWalterio.Api.Controllers
                 return Ok(new LoginResponse { Exitoso = false, Mensaje = $"Usuario bloqueado hasta {usuario.BloqueadoHasta:HH:mm}" });
 
             bool contraseñaValida = false;
-            try { contraseñaValida = BCrypt.Net.BCrypt.Verify(request.Contraseña, usuario.Contraseña); }
+            try { contraseñaValida = BCrypt.Net.BCrypt.Verify(request.Contrasena, usuario.Contraseña); }
             catch { contraseñaValida = false; }
 
             if (!contraseñaValida)
@@ -169,7 +169,7 @@ namespace SandwicheriaWalterio.Api.Controllers
                 NombreUsuario = request.NombreUsuario,
                 NombreCompleto = request.NombreCompleto,
                 Email = request.Email,
-                Contraseña = BCrypt.Net.BCrypt.HashPassword(request.Contraseña),
+                Contraseña = BCrypt.Net.BCrypt.HashPassword(request.Contrasena),
                 Rol = "Dueño", // El que se registra es dueño de su tenant
                 Activo = true,
                 FechaCreacion = DateTime.UtcNow,
@@ -249,7 +249,7 @@ namespace SandwicheriaWalterio.Api.Controllers
                 NombreUsuario = request.NombreUsuario,
                 NombreCompleto = request.NombreCompleto,
                 Email = request.Email,
-                Contraseña = BCrypt.Net.BCrypt.HashPassword(request.Contraseña),
+                Contraseña = BCrypt.Net.BCrypt.HashPassword(request.Contrasena),
                 Rol = "Dueño",
                 Activo = true,
                 FechaCreacion = DateTime.UtcNow,

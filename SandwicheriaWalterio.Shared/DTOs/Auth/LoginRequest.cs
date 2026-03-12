@@ -8,7 +8,7 @@ namespace SandwicheriaWalterio.DTOs.Auth
         public string NombreUsuario { get; set; } = string.Empty;
 
         [Required]
-        public string Contraseña { get; set; } = string.Empty;
+        public string Contrasena { get; set; } = string.Empty;
     }
 
     public class LoginEmpleadoRequest
@@ -35,7 +35,7 @@ namespace SandwicheriaWalterio.DTOs.Auth
 
         [Required]
         [MinLength(4)]
-        public string Contraseña { get; set; } = string.Empty;
+        public string Contrasena { get; set; } = string.Empty;
 
         [Required]
         public string Rol { get; set; } = "Empleado";
