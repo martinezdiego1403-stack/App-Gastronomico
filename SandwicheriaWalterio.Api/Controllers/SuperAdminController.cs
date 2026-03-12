@@ -29,9 +29,27 @@ namespace SandwicheriaWalterio.Api.Controllers
         [HttpGet("dashboard")]
         public IActionResult Dashboard()
         {
-            var tenants = _db.Tenants.ToList();
+            var tenants = _db.Tenants.AsNoTracking().ToList();
             var totalUsuarios = _db.Usuarios.IgnoreQueryFilters().Count();
             var hoy = DateTime.UtcNow.Date;
+
+            // Incluir lista de tenants directamente en el dashboard
+            var tenantsList = tenants.Select(t => new
+            {
+                t.TenantID,
+                t.TenantId,
+                t.NombreNegocio,
+                t.Plan,
+                t.Activo,
+                fechaCreacion = t.FechaCreacion,
+                fechaExpiracionTrial = t.FechaExpiracionTrial,
+                t.EmailContacto,
+                t.Telefono,
+                t.UsuarioDuenoID,
+                cantidadUsuarios = 0,
+                cantidadVentas = 0,
+                cantidadProductos = 0
+            }).ToList();
 
             return Ok(new
             {
@@ -39,80 +57,20 @@ namespace SandwicheriaWalterio.Api.Controllers
                 tenantsActivos = tenants.Count(t => t.Activo),
                 tenantsInactivos = tenants.Count(t => !t.Activo),
                 tenantsTrial = tenants.Count(t => t.Plan == "Trial"),
-                tenantsTrialExpirado = tenants.Count(t => t.EsTrial && t.FechaExpiracionTrial.HasValue && t.FechaExpiracionTrial < DateTime.UtcNow),
+                tenantsTrialExpirado = tenants.Count(t => t.Plan == "Trial" && t.FechaExpiracionTrial.HasValue && t.FechaExpiracionTrial < DateTime.UtcNow),
                 tenantsPro = tenants.Count(t => t.Plan == "Pro"),
                 tenantsProPlus = tenants.Count(t => t.Plan == "Pro+"),
                 tenantsProForever = tenants.Count(t => t.Plan == "ProForever"),
                 totalUsuarios,
                 registrosHoy = tenants.Count(t => t.FechaCreacion.Date == hoy),
-                registrosEstaSemana = tenants.Count(t => t.FechaCreacion >= DateTime.UtcNow.AddDays(-7))
+                registrosEstaSemana = tenants.Count(t => t.FechaCreacion >= DateTime.UtcNow.AddDays(-7)),
+                tenants = tenantsList
             });
         }
 
         /// <summary>
         /// GET /api/superadmin/tenants - Lista todos los tenants
         /// </summary>
-        [HttpGet("tenants")]
-        public IActionResult ObtenerTenants()
-        {
-            try
-            {
-                var tenants = _db.Tenants.AsNoTracking()
-                    .OrderByDescending(t => t.FechaCreacion)
-                    .ToList();
-
-                var resultado = tenants.Select(t => new
-                {
-                    t.TenantID,
-                    t.TenantId,
-                    t.NombreNegocio,
-                    t.Plan,
-                    t.Activo,
-                    fechaCreacion = t.FechaCreacion.ToString("o"),
-                    fechaExpiracionTrial = t.FechaExpiracionTrial?.ToString("o"),
-                    t.EmailContacto,
-                    t.Telefono,
-                    t.UsuarioDuenoID,
-                    cantidadUsuarios = 0,
-                    cantidadVentas = 0,
-                    cantidadProductos = 0
-                }).ToList();
-
-                return Ok(resultado);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { error = ex.Message, inner = ex.InnerException?.Message, stack = ex.StackTrace });
-            }
-        }
-
-        /// <summary>
-        /// GET /api/superadmin/ping - Test endpoint
-        /// </summary>
-        [HttpGet("ping")]
-        public IActionResult Ping()
-        {
-            try
-            {
-                var tenants = _db.Tenants.AsNoTracking().ToList();
-                var data = tenants.Select(t => new
-                {
-                    t.TenantID,
-                    t.TenantId,
-                    t.NombreNegocio,
-                    t.Plan,
-                    t.Activo,
-                    t.EmailContacto,
-                    t.UsuarioDuenoID
-                }).ToList();
-                return Ok(new { mensaje = "OK", count = tenants.Count, tenants = data });
-            }
-            catch (Exception ex)
-            {
-                return Ok(new { mensaje = "Error en DB", error = ex.Message, inner = ex.InnerException?.Message });
-            }
-        }
-
         /// <summary>
         /// GET /api/superadmin/tenants/{tenantId} - Detalle de un tenant
         /// </summary>

@@ -2,20 +2,6 @@ import { useState, useEffect } from 'react';
 import { superAdminService } from '../services/api';
 import { FiUsers, FiActivity, FiClock, FiTrendingUp, FiToggleLeft, FiToggleRight, FiEye } from 'react-icons/fi';
 
-interface DashboardStats {
-  totalTenants: number;
-  tenantsActivos: number;
-  tenantsInactivos: number;
-  tenantsTrial: number;
-  tenantsTrialExpirado: number;
-  tenantsPro: number;
-  tenantsProPlus: number;
-  tenantsProForever: number;
-  totalUsuarios: number;
-  registrosHoy: number;
-  registrosEstaSemana: number;
-}
-
 interface TenantRow {
   tenantID: number;
   tenantId: string;
@@ -30,10 +16,25 @@ interface TenantRow {
   cantidadProductos: number;
 }
 
+interface DashboardData {
+  totalTenants: number;
+  tenantsActivos: number;
+  tenantsInactivos: number;
+  tenantsTrial: number;
+  tenantsTrialExpirado: number;
+  tenantsPro: number;
+  tenantsProPlus: number;
+  tenantsProForever: number;
+  totalUsuarios: number;
+  registrosHoy: number;
+  registrosEstaSemana: number;
+  tenants: TenantRow[];
+}
+
 export default function SuperAdminDashboard() {
-  const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [tenants, setTenants] = useState<TenantRow[]>([]);
+  const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [detalle, setDetalle] = useState<any>(null);
 
   useEffect(() => {
@@ -42,14 +43,13 @@ export default function SuperAdminDashboard() {
 
   const cargarDatos = async () => {
     try {
-      const [dashRes, tenantsRes] = await Promise.all([
-        superAdminService.dashboard(),
-        superAdminService.obtenerTenants(),
-      ]);
-      setStats(dashRes.data);
-      setTenants(tenantsRes.data);
-    } catch (err) {
+      // Todo viene de /dashboard en una sola llamada
+      const res = await superAdminService.dashboard();
+      setData(res.data);
+      setError('');
+    } catch (err: any) {
       console.error('Error cargando dashboard SuperAdmin', err);
+      setError('Error al cargar datos: ' + (err.message || 'Error desconocido'));
     } finally {
       setLoading(false);
     }
@@ -83,6 +83,7 @@ export default function SuperAdminDashboard() {
   };
 
   if (loading) return <div className="page-loading">Cargando...</div>;
+  if (error) return <div className="page-loading" style={{ color: '#ff5252' }}>{error}</div>;
 
   return (
     <div className="page-container">
@@ -91,46 +92,46 @@ export default function SuperAdminDashboard() {
       </div>
 
       {/* Stats Cards */}
-      {stats && (
+      {data && (
         <div className="stats-grid">
           <div className="stat-card">
             <div className="stat-icon"><FiUsers /></div>
-            <div className="stat-value">{stats.totalTenants}</div>
+            <div className="stat-value">{data.totalTenants}</div>
             <div className="stat-label">Negocios totales</div>
           </div>
           <div className="stat-card stat-green">
             <div className="stat-icon"><FiToggleRight /></div>
-            <div className="stat-value">{stats.tenantsActivos}</div>
+            <div className="stat-value">{data.tenantsActivos}</div>
             <div className="stat-label">Activos</div>
           </div>
           <div className="stat-card stat-orange">
             <div className="stat-icon"><FiClock /></div>
-            <div className="stat-value">{stats.tenantsTrial}</div>
+            <div className="stat-value">{data.tenantsTrial}</div>
             <div className="stat-label">En trial</div>
           </div>
           <div className="stat-card stat-blue">
             <div className="stat-icon"><FiTrendingUp /></div>
-            <div className="stat-value">{stats.tenantsPro}</div>
+            <div className="stat-value">{data.tenantsPro}</div>
             <div className="stat-label">Plan Pro</div>
           </div>
           <div className="stat-card stat-blue">
             <div className="stat-icon"><FiTrendingUp /></div>
-            <div className="stat-value">{stats.tenantsProPlus}</div>
+            <div className="stat-value">{data.tenantsProPlus}</div>
             <div className="stat-label">Plan Pro+</div>
           </div>
           <div className="stat-card stat-blue">
             <div className="stat-icon"><FiTrendingUp /></div>
-            <div className="stat-value">{stats.tenantsProForever}</div>
+            <div className="stat-value">{data.tenantsProForever}</div>
             <div className="stat-label">Pro Forever</div>
           </div>
           <div className="stat-card">
             <div className="stat-icon"><FiUsers /></div>
-            <div className="stat-value">{stats.totalUsuarios}</div>
+            <div className="stat-value">{data.totalUsuarios}</div>
             <div className="stat-label">Usuarios totales</div>
           </div>
           <div className="stat-card stat-green">
             <div className="stat-icon"><FiTrendingUp /></div>
-            <div className="stat-value">{stats.registrosEstaSemana}</div>
+            <div className="stat-value">{data.registrosEstaSemana}</div>
             <div className="stat-label">Registros esta semana</div>
           </div>
         </div>
@@ -138,7 +139,7 @@ export default function SuperAdminDashboard() {
 
       {/* Tenants Table */}
       <div className="table-card">
-        <h3>Negocios registrados</h3>
+        <h3>Negocios registrados ({data?.tenants?.length || 0})</h3>
         <div className="table-responsive">
           <table className="data-table">
             <thead>
@@ -146,15 +147,12 @@ export default function SuperAdminDashboard() {
                 <th>Negocio</th>
                 <th>Plan</th>
                 <th>Estado</th>
-                <th>Usuarios</th>
-                <th>Ventas</th>
-                <th>Productos</th>
                 <th>Registro</th>
                 <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
-              {tenants.map(t => (
+              {(data?.tenants || []).map(t => (
                 <tr key={t.tenantId}>
                   <td>
                     <div className="tenant-name">{t.nombreNegocio}</div>
@@ -177,9 +175,6 @@ export default function SuperAdminDashboard() {
                       {t.activo ? 'Activo' : 'Inactivo'}
                     </span>
                   </td>
-                  <td>{t.cantidadUsuarios}</td>
-                  <td>{t.cantidadVentas}</td>
-                  <td>{t.cantidadProductos}</td>
                   <td>{new Date(t.fechaCreacion).toLocaleDateString('es-AR')}</td>
                   <td>
                     <div className="action-buttons">
@@ -201,6 +196,9 @@ export default function SuperAdminDashboard() {
                   </td>
                 </tr>
               ))}
+              {(!data?.tenants || data.tenants.length === 0) && (
+                <tr><td colSpan={5} style={{ textAlign: 'center', padding: '2rem', opacity: 0.5 }}>No hay negocios registrados</td></tr>
+              )}
             </tbody>
           </table>
         </div>
