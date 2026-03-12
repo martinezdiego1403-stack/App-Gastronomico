@@ -94,8 +94,18 @@ namespace SandwicheriaWalterio.Api.Controllers
         {
             try
             {
-                var count = _db.Tenants.Count();
-                return Ok(new { mensaje = "SuperAdmin OK", timestamp = DateTime.UtcNow, tenantsCount = count });
+                var tenants = _db.Tenants.AsNoTracking().ToList();
+                var data = tenants.Select(t => new
+                {
+                    t.TenantID,
+                    t.TenantId,
+                    t.NombreNegocio,
+                    t.Plan,
+                    t.Activo,
+                    t.EmailContacto,
+                    t.UsuarioDuenoID
+                }).ToList();
+                return Ok(new { mensaje = "OK", count = tenants.Count, tenants = data });
             }
             catch (Exception ex)
             {
