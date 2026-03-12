@@ -52,21 +52,21 @@ export default function Usuarios() {
     try {
       if (editando) {
         const data: any = {
-          usuarioID: editando.usuarioID,
-          nombreUsuario: form.nombreUsuario,
-          nombreCompleto: form.nombreCompleto,
-          email: form.email,
-          rol: form.rol,
+          UsuarioID: editando.usuarioID,
+          NombreUsuario: form.nombreUsuario,
+          NombreCompleto: form.nombreCompleto,
+          Email: form.email,
+          Rol: form.rol,
         };
-        if (form.contraseña) data.contraseña = form.contraseña;
+        if (form.contraseña) data['Contraseña'] = form.contraseña;
         await usuariosService.actualizar(editando.usuarioID, data);
       } else {
         await usuariosService.crear({
-          nombreUsuario: form.nombreUsuario,
-          nombreCompleto: form.nombreCompleto,
-          email: form.email,
-          rol: form.rol,
-          contraseña: form.contraseña,
+          NombreUsuario: form.nombreUsuario,
+          NombreCompleto: form.nombreCompleto,
+          Email: form.email,
+          Rol: form.rol,
+          'Contraseña': form.contraseña,
         });
       }
       setShowForm(false);
