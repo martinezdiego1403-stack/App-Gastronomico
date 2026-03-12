@@ -57,24 +57,28 @@ namespace SandwicheriaWalterio.Api.Controllers
         {
             try
             {
-                var tenants = _db.Tenants
+                var tenants = _db.Tenants.AsNoTracking()
                     .OrderByDescending(t => t.FechaCreacion)
-                    .Select(t => new
-                    {
-                        t.TenantID,
-                        t.TenantId,
-                        t.NombreNegocio,
-                        t.Plan,
-                        t.Activo,
-                        t.FechaCreacion,
-                        t.FechaExpiracionTrial,
-                        t.EmailContacto,
-                        t.Telefono,
-                        t.UsuarioDuenoID
-                    })
                     .ToList();
 
-                return Ok(tenants);
+                var resultado = tenants.Select(t => new
+                {
+                    t.TenantID,
+                    t.TenantId,
+                    t.NombreNegocio,
+                    t.Plan,
+                    t.Activo,
+                    fechaCreacion = t.FechaCreacion.ToString("o"),
+                    fechaExpiracionTrial = t.FechaExpiracionTrial?.ToString("o"),
+                    t.EmailContacto,
+                    t.Telefono,
+                    t.UsuarioDuenoID,
+                    cantidadUsuarios = 0,
+                    cantidadVentas = 0,
+                    cantidadProductos = 0
+                }).ToList();
+
+                return Ok(resultado);
             }
             catch (Exception ex)
             {
