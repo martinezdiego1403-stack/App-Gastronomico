@@ -30,7 +30,7 @@ namespace SandwicheriaWalterio.Api.Data.Repositories
             var detalles = _db.DetalleVentas.Include(d => d.Producto).Include(d => d.Venta)
                 .Where(d => d.Venta!.FechaVenta >= fechaInicio.Date && d.Venta.FechaVenta <= fechaFinAjustada).ToList();
 
-            return detalles.GroupBy(d => d.Producto?.Nombre ?? "Sin nombre")
+            return detalles.GroupBy(d => d.Producto?.Nombre ?? d.NombreReceta ?? "Sin nombre")
                 .Select(g => new ProductoMasVendido { NombreProducto = g.Key, CantidadVendida = g.Sum(d => d.Cantidad), TotalVentas = g.Sum(d => d.Subtotal) })
                 .OrderByDescending(p => p.CantidadVendida).Take(cantidad).ToList();
         }
@@ -98,7 +98,19 @@ namespace SandwicheriaWalterio.Api.Data.Repositories
                 .Where(d => d.Venta!.FechaVenta >= fechaInicio.Date && d.Venta.FechaVenta <= fechaFinAjustada).ToList();
             var total = detalles.Sum(d => d.Subtotal);
 
-            return detalles.GroupBy(d => d.Producto?.Categoria?.Nombre ?? "Sin categoría")
+            // Precarga de recetas con categorias para resolver detalles de recetas
+            var recetasConCategoria = _db.Recetas.Include(r => r.Categoria).ToList();
+
+            return detalles.GroupBy(d =>
+                {
+                    if (d.Producto?.Categoria != null) return d.Producto.Categoria.Nombre;
+                    if (!string.IsNullOrEmpty(d.NombreReceta))
+                    {
+                        var receta = recetasConCategoria.FirstOrDefault(r => r.Nombre == d.NombreReceta);
+                        if (receta?.Categoria != null) return receta.Categoria.Nombre;
+                    }
+                    return "Sin categoría";
+                })
                 .Select(g => new VentaPorCategoria
                 {
                     Categoria = g.Key, CantidadVendida = g.Sum(d => d.Cantidad), TotalVentas = g.Sum(d => d.Subtotal),

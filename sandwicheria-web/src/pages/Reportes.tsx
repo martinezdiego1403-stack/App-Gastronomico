@@ -145,7 +145,7 @@ export default function Reportes() {
                   {masVendidos.map((p, i) => (
                     <tr key={i}>
                       <td><span className="rank-badge">{i + 1}</span></td>
-                      <td><strong>{p.nombre || p.producto}</strong></td>
+                      <td><strong>{p.nombreProducto || p.nombre || p.producto}</strong></td>
                       <td>{p.cantidadVendida || p.cantidad}</td>
                       <td className="text-success">{formatMoney(p.totalVentas || p.total)}</td>
                     </tr>
