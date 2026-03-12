@@ -2121,6 +2121,34 @@ select:focus { border-color: var(--accent-primary); }
   margin-top: 0.25rem;
 }
 
+.lt-pricing-badge-desktop {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.lt-pricing-desktop {
+  border-color: rgba(99, 102, 241, 0.3);
+}
+
+.lt-pricing-desktop-note {
+  font-size: 0.68rem;
+  color: var(--lt-text-secondary);
+  text-align: center;
+  margin-top: 0.6rem;
+  line-height: 1.4;
+}
+
+.lt-btn-mailto {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  cursor: pointer;
+}
+
 .lt-pricing-divider {
   width: 40px;
   height: 2px;

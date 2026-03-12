@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FiCheck, FiArrowRight, FiShoppingCart, FiBarChart2, FiPackage, FiSmartphone, FiStar, FiSun, FiMoon, FiPrinter } from 'react-icons/fi';
+import { FiCheck, FiArrowRight, FiShoppingCart, FiBarChart2, FiPackage, FiSmartphone, FiStar, FiSun, FiMoon, FiPrinter, FiMonitor, FiMail } from 'react-icons/fi';
 import { useTheme } from '../context/ThemeContext';
 
 const features = [
@@ -27,6 +27,7 @@ const planes = [
     ],
     destacado: false,
     botonTexto: 'Empezar gratis',
+    esDesktop: false,
   },
   {
     nombre: 'Pro',
@@ -45,6 +46,7 @@ const planes = [
     ],
     destacado: true,
     botonTexto: 'Elegir Pro',
+    esDesktop: false,
   },
   {
     nombre: 'Pro+',
@@ -61,6 +63,7 @@ const planes = [
     ],
     destacado: false,
     botonTexto: 'Elegir Pro+',
+    esDesktop: false,
   },
   {
     nombre: 'Pro Forever',
@@ -70,14 +73,16 @@ const planes = [
     periodo: 'USD o USDT pago unico',
     features: [
       'Todo lo del plan Pro+',
-      'App instalada en tu PC',
-      'Funciona sin conexion WiFi',
+      'App de escritorio para Windows 10/11',
+      'Funciona sin conexion a internet',
+      'Base de datos local en tu PC',
       'Personalizacion completa',
       'Sin pagos mensuales nunca mas',
       'Soporte de por vida',
     ],
     destacado: false,
-    botonTexto: 'Comprar Forever',
+    botonTexto: 'Contactar para comprar',
+    esDesktop: true,
   },
 ];
 
@@ -175,8 +180,9 @@ export default function Landing() {
         </div>
         <div className="lt-pricing-grid">
           {planes.map((plan, i) => (
-            <motion.div key={i} className={`lt-pricing-card ${plan.destacado ? 'lt-pricing-featured' : ''}`} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} viewport={{ once: true }}>
+            <motion.div key={i} className={`lt-pricing-card ${plan.destacado ? 'lt-pricing-featured' : ''} ${plan.esDesktop ? 'lt-pricing-desktop' : ''}`} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} viewport={{ once: true }}>
               {plan.destacado && <div className="lt-pricing-badge">Mas Popular</div>}
+              {plan.esDesktop && <div className="lt-pricing-badge lt-pricing-badge-desktop"><FiMonitor /> Escritorio</div>}
               <div className="lt-pricing-tag">{plan.tag}</div>
               <div className="lt-pricing-name">{plan.nombre}</div>
               <div className="lt-pricing-price">
@@ -188,7 +194,16 @@ export default function Landing() {
               <ul className="lt-pricing-features">
                 {plan.features.map((f, j) => <li key={j}><FiCheck /> {f}</li>)}
               </ul>
-              <button className={plan.destacado ? 'lt-btn-primary lt-btn-full' : 'lt-btn-outline lt-btn-full'} onClick={() => navigate('/registro')}>{plan.botonTexto}</button>
+              {plan.esDesktop ? (
+                <>
+                  <a href="mailto:gastronomicapp@gmail.com?subject=Consulta%20Plan%20Pro%20Forever" className="lt-btn-outline lt-btn-full lt-btn-mailto">
+                    <FiMail /> {plan.botonTexto}
+                  </a>
+                  <p className="lt-pricing-desktop-note">Solo Windows 10/11. Otro SO? Escribinos a gastronomicapp@gmail.com</p>
+                </>
+              ) : (
+                <button className={plan.destacado ? 'lt-btn-primary lt-btn-full' : 'lt-btn-outline lt-btn-full'} onClick={() => navigate('/registro')}>{plan.botonTexto}</button>
+              )}
             </motion.div>
           ))}
         </div>
@@ -220,7 +235,7 @@ export default function Landing() {
       <section className="lt-cta">
         <motion.div className="lt-cta-content" initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }}>
           <h2>Listo para empezar?</h2>
-          <p>Proba GastronomiApp gratis por 7 dias y lleva tu negocio al siguiente nivel.</p>
+          <p>Proba GastronomiApp gratis por 14 dias y lleva tu negocio al siguiente nivel.</p>
           <button className="lt-btn-primary lt-btn-xl" onClick={() => navigate('/registro')}>
             Crear mi cuenta gratis <FiArrowRight />
           </button>
@@ -234,7 +249,7 @@ export default function Landing() {
           <span>GastronomiApp &copy; 2026</span>
         </div>
         <div className="lt-footer-right">
-          admin@gastronomiapp.com
+          gastronomicapp@gmail.com
         </div>
       </footer>
     </div>
