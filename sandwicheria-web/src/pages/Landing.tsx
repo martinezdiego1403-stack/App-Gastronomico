@@ -12,9 +12,73 @@ const features = [
 ];
 
 const planes = [
-  { nombre: 'Prueba Gratis', precio: '$0', periodo: '7 dias', features: ['Todas las funciones', '1 usuario', 'Datos en la nube', 'Soporte basico'], destacado: false, crypto: null, botonTexto: 'Empezar gratis' },
-  { nombre: 'Mensual (Web)', precio: '$35', periodo: 'USD/mes', features: ['Acceso completo via web', 'Usuarios ilimitados', 'Soporte prioritario', 'Backup diario', 'Actualizaciones incluidas'], destacado: true, crypto: '29 USDT/mes', botonTexto: 'Elegir Mensual' },
-  { nombre: 'De por vida (App)', precio: '$380', periodo: 'USD pago unico', features: ['App de escritorio para siempre', 'Sin pagos mensuales', 'Usuarios ilimitados', 'Soporte de por vida', 'Todas las actualizaciones'], destacado: false, crypto: '380 USDT pago unico', botonTexto: 'Comprar App' },
+  {
+    nombre: 'Free Trial',
+    tag: 'Gratis',
+    precioUsd: '$0',
+    precioArs: null,
+    periodo: '14 dias de prueba',
+    features: [
+      'Todas las funciones',
+      '1 usuario',
+      'Datos en la nube',
+      'Soporte basico',
+      'Facturacion comun',
+    ],
+    destacado: false,
+    botonTexto: 'Empezar gratis',
+  },
+  {
+    nombre: 'Pro',
+    tag: 'Mensual',
+    precioUsd: '$18',
+    precioArs: '$26.000 ARS',
+    periodo: 'USD / mes',
+    features: [
+      'Todo lo del Free Trial',
+      'Acceso completo via web',
+      'Usuarios ilimitados',
+      'Soporte prioritario',
+      'Datos guardados diariamente',
+      'Actualizaciones incluidas',
+      'Facturacion fiscal avanzada',
+    ],
+    destacado: true,
+    botonTexto: 'Elegir Pro',
+  },
+  {
+    nombre: 'Pro+',
+    tag: 'Anual',
+    precioUsd: '$180',
+    precioArs: '$260.000 ARS',
+    periodo: 'USD / año',
+    features: [
+      'Todo lo del plan Pro',
+      'Personalizacion de logos',
+      'Carga de productos y recetas incluida',
+      'Nos encargamos de subir tu info',
+      'Ahorra 2 meses vs mensual',
+    ],
+    destacado: false,
+    botonTexto: 'Elegir Pro+',
+  },
+  {
+    nombre: 'Pro Forever',
+    tag: 'Pago unico',
+    precioUsd: '$250',
+    precioArs: '$355.000 ARS',
+    periodo: 'USD pago unico',
+    features: [
+      'Todo lo del plan Pro+',
+      'App instalada en tu PC',
+      'Funciona sin conexion WiFi',
+      'Personalizacion completa',
+      'Sin pagos mensuales nunca mas',
+      'Soporte de por vida',
+    ],
+    destacado: false,
+    botonTexto: 'Comprar Forever',
+  },
 ];
 
 const testimonios = [
@@ -62,7 +126,7 @@ export default function Landing() {
               Ya tengo cuenta
             </button>
           </div>
-          <p className="lt-hero-note">7 dias gratis. Sin tarjeta de credito.</p>
+          <p className="lt-hero-note">14 dias gratis. Sin tarjeta de credito.</p>
         </motion.div>
 
         <motion.div className="lt-hero-image" initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.2 }}>
@@ -106,19 +170,21 @@ export default function Landing() {
       {/* Pricing */}
       <section className="lt-pricing" id="pricing">
         <div className="lt-section-header">
-          <h2 className="lt-section-title">Planes simples</h2>
-          <p className="lt-section-subtitle">Sin letra chica. Cancela cuando quieras.</p>
+          <h2 className="lt-section-title">Elegi tu plan</h2>
+          <p className="lt-section-subtitle">Sin letra chica. Cancela cuando quieras. Todos los planes incluyen actualizaciones.</p>
         </div>
         <div className="lt-pricing-grid">
           {planes.map((plan, i) => (
             <motion.div key={i} className={`lt-pricing-card ${plan.destacado ? 'lt-pricing-featured' : ''}`} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} viewport={{ once: true }}>
-              {plan.destacado && <div className="lt-pricing-badge">Popular</div>}
+              {plan.destacado && <div className="lt-pricing-badge">Mas Popular</div>}
+              <div className="lt-pricing-tag">{plan.tag}</div>
               <div className="lt-pricing-name">{plan.nombre}</div>
               <div className="lt-pricing-price">
-                <span className="lt-price-amount">{plan.precio}</span>
+                <span className="lt-price-amount">{plan.precioUsd}</span>
                 <span className="lt-price-period">{plan.periodo}</span>
               </div>
-              {plan.crypto && <div className="lt-pricing-crypto">o {plan.crypto}</div>}
+              {plan.precioArs && <div className="lt-pricing-ars">{plan.precioArs}</div>}
+              <div className="lt-pricing-divider" />
               <ul className="lt-pricing-features">
                 {plan.features.map((f, j) => <li key={j}><FiCheck /> {f}</li>)}
               </ul>
