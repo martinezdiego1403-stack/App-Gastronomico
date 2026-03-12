@@ -31,6 +31,7 @@ namespace SandwicheriaWalterio.Api.Controllers
         {
             var tenants = _db.Tenants.ToList();
             var totalUsuarios = _db.Usuarios.IgnoreQueryFilters().Count();
+            var hoy = DateTime.UtcNow.Date;
 
             return Ok(new
             {
@@ -38,10 +39,12 @@ namespace SandwicheriaWalterio.Api.Controllers
                 tenantsActivos = tenants.Count(t => t.Activo),
                 tenantsInactivos = tenants.Count(t => !t.Activo),
                 tenantsTrial = tenants.Count(t => t.Plan == "Trial"),
-                tenantsTrialExpirado = tenants.Count(t => t.TrialExpirado),
-                tenantsPago = tenants.Count(t => t.Plan != "Trial"),
+                tenantsTrialExpirado = tenants.Count(t => t.EsTrial && t.FechaExpiracionTrial.HasValue && t.FechaExpiracionTrial < DateTime.UtcNow),
+                tenantsPro = tenants.Count(t => t.Plan == "Pro"),
+                tenantsProPlus = tenants.Count(t => t.Plan == "Pro+"),
+                tenantsProForever = tenants.Count(t => t.Plan == "ProForever"),
                 totalUsuarios,
-                registrosHoy = tenants.Count(t => t.FechaCreacion.Date == DateTime.UtcNow.Date),
+                registrosHoy = tenants.Count(t => t.FechaCreacion.Date == hoy),
                 registrosEstaSemana = tenants.Count(t => t.FechaCreacion >= DateTime.UtcNow.AddDays(-7))
             });
         }
@@ -54,26 +57,42 @@ namespace SandwicheriaWalterio.Api.Controllers
         {
             var tenants = _db.Tenants
                 .OrderByDescending(t => t.FechaCreacion)
-                .Select(t => new
-                {
-                    t.TenantID,
-                    t.TenantId,
-                    t.NombreNegocio,
-                    t.Plan,
-                    t.Activo,
-                    t.FechaCreacion,
-                    t.FechaExpiracionTrial,
-                    t.EmailContacto,
-                    t.Telefono,
-                    t.UsuarioDuenoID,
-                    // Contar usuarios y ventas de cada tenant
-                    cantidadUsuarios = _db.Usuarios.IgnoreQueryFilters().Count(u => u.TenantId == t.TenantId),
-                    cantidadVentas = _db.Ventas.IgnoreQueryFilters().Count(v => v.TenantId == t.TenantId),
-                    cantidadProductos = _db.Productos.IgnoreQueryFilters().Count(p => p.TenantId == t.TenantId)
-                })
                 .ToList();
 
-            return Ok(tenants);
+            // Contar por separado para evitar problemas con IgnoreQueryFilters en subqueries
+            var usuarios = _db.Usuarios.IgnoreQueryFilters()
+                .GroupBy(u => u.TenantId)
+                .Select(g => new { TenantId = g.Key, Cantidad = g.Count() })
+                .ToDictionary(x => x.TenantId, x => x.Cantidad);
+
+            var ventas = _db.Ventas.IgnoreQueryFilters()
+                .GroupBy(v => v.TenantId)
+                .Select(g => new { TenantId = g.Key, Cantidad = g.Count() })
+                .ToDictionary(x => x.TenantId, x => x.Cantidad);
+
+            var productos = _db.Productos.IgnoreQueryFilters()
+                .GroupBy(p => p.TenantId)
+                .Select(g => new { TenantId = g.Key, Cantidad = g.Count() })
+                .ToDictionary(x => x.TenantId, x => x.Cantidad);
+
+            var resultado = tenants.Select(t => new
+            {
+                t.TenantID,
+                t.TenantId,
+                t.NombreNegocio,
+                t.Plan,
+                t.Activo,
+                t.FechaCreacion,
+                t.FechaExpiracionTrial,
+                t.EmailContacto,
+                t.Telefono,
+                t.UsuarioDuenoID,
+                cantidadUsuarios = usuarios.GetValueOrDefault(t.TenantId, 0),
+                cantidadVentas = ventas.GetValueOrDefault(t.TenantId, 0),
+                cantidadProductos = productos.GetValueOrDefault(t.TenantId, 0)
+            });
+
+            return Ok(resultado);
         }
 
         /// <summary>

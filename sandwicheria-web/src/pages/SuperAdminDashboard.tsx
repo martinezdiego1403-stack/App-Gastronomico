@@ -8,7 +8,9 @@ interface DashboardStats {
   tenantsInactivos: number;
   tenantsTrial: number;
   tenantsTrialExpirado: number;
-  tenantsPago: number;
+  tenantsPro: number;
+  tenantsProPlus: number;
+  tenantsProForever: number;
   totalUsuarios: number;
   registrosHoy: number;
   registrosEstaSemana: number;
@@ -108,8 +110,18 @@ export default function SuperAdminDashboard() {
           </div>
           <div className="stat-card stat-blue">
             <div className="stat-icon"><FiTrendingUp /></div>
-            <div className="stat-value">{stats.tenantsPago}</div>
-            <div className="stat-label">Plan pago</div>
+            <div className="stat-value">{stats.tenantsPro}</div>
+            <div className="stat-label">Plan Pro</div>
+          </div>
+          <div className="stat-card stat-blue">
+            <div className="stat-icon"><FiTrendingUp /></div>
+            <div className="stat-value">{stats.tenantsProPlus}</div>
+            <div className="stat-label">Plan Pro+</div>
+          </div>
+          <div className="stat-card stat-blue">
+            <div className="stat-icon"><FiTrendingUp /></div>
+            <div className="stat-value">{stats.tenantsProForever}</div>
+            <div className="stat-label">Pro Forever</div>
           </div>
           <div className="stat-card">
             <div className="stat-icon"><FiUsers /></div>
