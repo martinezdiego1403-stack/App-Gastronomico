@@ -78,8 +78,17 @@ namespace SandwicheriaWalterio.Api.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { error = ex.Message, inner = ex.InnerException?.Message });
+                return StatusCode(500, new { error = ex.Message, inner = ex.InnerException?.Message, stack = ex.StackTrace });
             }
+        }
+
+        /// <summary>
+        /// GET /api/superadmin/ping - Test endpoint
+        /// </summary>
+        [HttpGet("ping")]
+        public IActionResult Ping()
+        {
+            return Ok(new { mensaje = "SuperAdmin OK", timestamp = DateTime.UtcNow });
         }
 
         /// <summary>
