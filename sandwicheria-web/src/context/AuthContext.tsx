@@ -42,6 +42,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const savedUsuario = localStorage.getItem('usuario');
     const savedTenant = localStorage.getItem('tenant');
     if (savedToken && savedUsuario) {
+      // Verificar si el token JWT no esta expirado
+      try {
+        const payload = JSON.parse(atob(savedToken.split('.')[1]));
+        if (payload.exp && payload.exp * 1000 < Date.now()) {
+          // Token expirado — limpiar todo
+          localStorage.removeItem('token');
+          localStorage.removeItem('usuario');
+          localStorage.removeItem('tenant');
+          return;
+        }
+      } catch {
+        // Token malformado — limpiar
+        localStorage.removeItem('token');
+        localStorage.removeItem('usuario');
+        localStorage.removeItem('tenant');
+        return;
+      }
       setToken(savedToken);
       setUsuario(JSON.parse(savedUsuario));
       if (savedTenant) setTenant(JSON.parse(savedTenant));
