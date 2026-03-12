@@ -782,6 +782,77 @@ select:focus { border-color: var(--accent-primary); }
 
 .form-row input:focus { border-color: var(--accent-primary); }
 
+/* Category inline create/delete */
+.categoria-input-group {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+}
+.categoria-input-group select {
+  flex: 1;
+}
+.btn-crear-cat {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  border: 1px dashed var(--accent-primary);
+  background: transparent;
+  color: var(--accent-primary);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+.btn-crear-cat:hover {
+  background: var(--accent-primary);
+  color: #fff;
+}
+.nueva-categoria-inline {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+  align-items: center;
+}
+.nueva-categoria-inline input {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--accent-primary);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  outline: none;
+}
+.btn-icon.success {
+  color: var(--success);
+}
+.categoria-filter-group {
+  display: flex;
+  gap: 0.3rem;
+  align-items: center;
+}
+
+/* Type badge for Menu (producto vs receta) */
+.type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.type-badge.producto {
+  background: var(--info-bg);
+  color: var(--info);
+}
+.type-badge.receta {
+  background: rgba(255, 107, 53, 0.12);
+  color: var(--accent-primary);
+}
+
 /* Alerts */
 .alert {
   padding: 0.8rem 1.2rem;

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { recetasService, productosService, categoriasService } from '../services/api';
 import { motion } from 'framer-motion';
-import { FiBookOpen, FiPlus, FiEdit2, FiTrash2, FiSearch, FiRefreshCw, FiList } from 'react-icons/fi';
+import { FiBookOpen, FiPlus, FiEdit2, FiTrash2, FiSearch, FiRefreshCw, FiList, FiX, FiCheck } from 'react-icons/fi';
 
 interface Receta {
   recetaID: number;
@@ -34,6 +34,8 @@ export default function Recetas() {
   const [editando, setEditando] = useState<Receta | null>(null);
   const [form, setForm] = useState({ nombre: '', descripcion: '', precio: '', stockActual: '0', categoriaID: '' });
   const [ingredientes, setIngredientes] = useState<Ingrediente[]>([]);
+  const [creandoCategoria, setCreandoCategoria] = useState(false);
+  const [nuevaCategoriaNombre, setNuevaCategoriaNombre] = useState('');
 
   useEffect(() => { cargar(); }, []);
 
@@ -142,6 +144,22 @@ export default function Recetas() {
       cargar();
     } catch (err: any) {
       alert(err.response?.data?.error || 'Error al eliminar');
+    }
+  };
+
+  const crearCategoria = async () => {
+    if (!nuevaCategoriaNombre.trim()) return;
+    try {
+      await categoriasService.crear({ nombre: nuevaCategoriaNombre.trim(), tipoCategoria: 'Menu' });
+      setNuevaCategoriaNombre('');
+      setCreandoCategoria(false);
+      const catRes = await categoriasService.obtenerMenu();
+      const cats = catRes.data || [];
+      setCategorias(cats);
+      const nueva = cats.find((c: any) => c.nombre === nuevaCategoriaNombre.trim());
+      if (nueva) setForm(prev => ({ ...prev, categoriaID: String(nueva.categoriaID) }));
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Error al crear categoria');
     }
   };
 
@@ -254,11 +272,29 @@ export default function Recetas() {
               </div>
               <div className="form-group">
                 <label>Categoria</label>
-                <select value={form.categoriaID} onChange={e => setForm({ ...form, categoriaID: e.target.value })}>
-                  {categorias.map(c => (
-                    <option key={c.categoriaID} value={c.categoriaID}>{c.nombre}</option>
-                  ))}
-                </select>
+                <div className="categoria-input-group">
+                  <select value={form.categoriaID} onChange={e => setForm({ ...form, categoriaID: e.target.value })}>
+                    {categorias.map(c => (
+                      <option key={c.categoriaID} value={c.categoriaID}>{c.nombre}</option>
+                    ))}
+                  </select>
+                  <button type="button" className="btn-crear-cat" onClick={() => setCreandoCategoria(!creandoCategoria)} title="Crear nueva categoria">
+                    <FiPlus />
+                  </button>
+                </div>
+                {creandoCategoria && (
+                  <div className="nueva-categoria-inline">
+                    <input
+                      placeholder="Nombre de la categoria"
+                      value={nuevaCategoriaNombre}
+                      onChange={e => setNuevaCategoriaNombre(e.target.value)}
+                      onKeyDown={e => e.key === 'Enter' && crearCategoria()}
+                      autoFocus
+                    />
+                    <button className="btn-icon success" onClick={crearCategoria}><FiCheck /></button>
+                    <button className="btn-icon" onClick={() => { setCreandoCategoria(false); setNuevaCategoriaNombre(''); }}><FiX /></button>
+                  </div>
+                )}
               </div>
               <div className="form-group">
                 <label>Precio</label>
@@ -289,7 +325,15 @@ export default function Recetas() {
                       <input type="number" step="0.1" value={ing.cantidad}
                         onChange={e => actualizarIngrediente(i, 'cantidad', e.target.value)} style={{ width: '80px' }} />
                     </td>
-                    <td>{ing.unidadMedida}</td>
+                    <td>
+                      <select value={ing.unidadMedida} onChange={e => actualizarIngrediente(i, 'unidadMedida', e.target.value)}>
+                        <option value="Unidad">Unidad</option>
+                        <option value="Kilogramo">Kilogramo</option>
+                        <option value="Gramo">Gramo</option>
+                        <option value="Litro">Litro</option>
+                        <option value="Mililitro">Mililitro</option>
+                      </select>
+                    </td>
                     <td>
                       <button className="btn-icon delete" onClick={() => eliminarIngrediente(i)}><FiTrash2 /></button>
                     </td>

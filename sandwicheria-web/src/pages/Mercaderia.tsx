@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { productosService, categoriasService } from '../services/api';
 import { motion } from 'framer-motion';
-import { FiPackage, FiPlus, FiEdit2, FiTrash2, FiSearch, FiRefreshCw } from 'react-icons/fi';
+import { FiPackage, FiPlus, FiEdit2, FiTrash2, FiSearch, FiRefreshCw, FiX, FiCheck } from 'react-icons/fi';
 
 interface Producto {
   productoID: number;
@@ -30,6 +30,8 @@ export default function Mercaderia() {
   const [showForm, setShowForm] = useState(false);
   const [editando, setEditando] = useState<Producto | null>(null);
   const [form, setForm] = useState({ nombre: '', descripcion: '', precio: '', stockActual: '', stockMinimo: '', categoriaID: '', unidadMedida: 'Unidad' });
+  const [creandoCategoria, setCreandoCategoria] = useState(false);
+  const [nuevaCategoriaNombre, setNuevaCategoriaNombre] = useState('');
 
   useEffect(() => { cargar(); }, []);
 
@@ -104,6 +106,34 @@ export default function Mercaderia() {
     }
   };
 
+  const crearCategoria = async () => {
+    if (!nuevaCategoriaNombre.trim()) return;
+    try {
+      await categoriasService.crear({ nombre: nuevaCategoriaNombre.trim(), tipoCategoria: 'Mercaderia' });
+      setNuevaCategoriaNombre('');
+      setCreandoCategoria(false);
+      const catRes = await categoriasService.obtenerMercaderia();
+      const cats = catRes.data || [];
+      setCategorias(cats);
+      const nueva = cats.find((c: Categoria) => c.nombre === nuevaCategoriaNombre.trim());
+      if (nueva) setForm(prev => ({ ...prev, categoriaID: String(nueva.categoriaID) }));
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Error al crear categoria');
+    }
+  };
+
+  const eliminarCategoria = async (id: number) => {
+    if (!window.confirm('Eliminar esta categoria? Los insumos asociados podrian verse afectados.')) return;
+    try {
+      await categoriasService.eliminar(id);
+      const catRes = await categoriasService.obtenerMercaderia();
+      setCategorias(catRes.data || []);
+      cargar();
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Error al eliminar categoria');
+    }
+  };
+
   const formatMoney = (n: number) => `$${(n || 0).toLocaleString('es-AR')}`;
   const formatStock = (p: Producto) => {
     const u = p.unidadMedida || 'U';
@@ -124,12 +154,19 @@ export default function Mercaderia() {
             <FiSearch />
             <input placeholder="Buscar..." value={busqueda} onChange={e => setBusqueda(e.target.value)} />
           </div>
-          <select value={categoriaFiltro} onChange={e => setCategoriaFiltro(Number(e.target.value))}>
-            <option value={0}>Todas las categorias</option>
-            {categorias.map(c => (
-              <option key={c.categoriaID} value={c.categoriaID}>{c.nombre}</option>
-            ))}
-          </select>
+          <div className="categoria-filter-group">
+            <select value={categoriaFiltro} onChange={e => setCategoriaFiltro(Number(e.target.value))}>
+              <option value={0}>Todas las categorias</option>
+              {categorias.map(c => (
+                <option key={c.categoriaID} value={c.categoriaID}>{c.nombre}</option>
+              ))}
+            </select>
+            {categoriaFiltro !== 0 && (
+              <button className="btn-icon delete" title="Eliminar categoria" onClick={() => eliminarCategoria(categoriaFiltro)}>
+                <FiX />
+              </button>
+            )}
+          </div>
           <button className="btn btn-ghost" onClick={cargar}><FiRefreshCw /></button>
         </div>
       </div>
@@ -202,11 +239,29 @@ export default function Mercaderia() {
               </div>
               <div className="form-group">
                 <label>Categoria</label>
-                <select value={form.categoriaID} onChange={e => setForm({ ...form, categoriaID: e.target.value })}>
-                  {categorias.map(c => (
-                    <option key={c.categoriaID} value={c.categoriaID}>{c.nombre}</option>
-                  ))}
-                </select>
+                <div className="categoria-input-group">
+                  <select value={form.categoriaID} onChange={e => setForm({ ...form, categoriaID: e.target.value })}>
+                    {categorias.map(c => (
+                      <option key={c.categoriaID} value={c.categoriaID}>{c.nombre}</option>
+                    ))}
+                  </select>
+                  <button type="button" className="btn-crear-cat" onClick={() => setCreandoCategoria(!creandoCategoria)} title="Crear nueva categoria">
+                    <FiPlus />
+                  </button>
+                </div>
+                {creandoCategoria && (
+                  <div className="nueva-categoria-inline">
+                    <input
+                      placeholder="Nombre de la categoria"
+                      value={nuevaCategoriaNombre}
+                      onChange={e => setNuevaCategoriaNombre(e.target.value)}
+                      onKeyDown={e => e.key === 'Enter' && crearCategoria()}
+                      autoFocus
+                    />
+                    <button className="btn-icon success" onClick={crearCategoria}><FiCheck /></button>
+                    <button className="btn-icon" onClick={() => { setCreandoCategoria(false); setNuevaCategoriaNombre(''); }}><FiX /></button>
+                  </div>
+                )}
               </div>
               <div className="form-group">
                 <label>Unidad de Medida</label>

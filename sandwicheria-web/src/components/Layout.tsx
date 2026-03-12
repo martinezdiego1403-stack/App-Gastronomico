@@ -17,13 +17,13 @@ interface NavItem {
 const navItems: NavItem[] = [
   { to: '/app/caja', icon: <FiDollarSign />, label: 'Caja' },
   { to: '/app/ventas', icon: <FiShoppingCart />, label: 'Punto de Venta' },
-  { to: '/app/menu', icon: <FiGrid />, label: 'Menu' },
-  { to: '/app/mercaderia', icon: <FiPackage />, label: 'Mercaderia' },
-  { to: '/app/recetas', icon: <FiBookOpen />, label: 'Recetas' },
+  { to: '/app/menu', icon: <FiGrid />, label: 'Menu', rolesPermitidos: ['Dueño', 'Dueno', 'Administrador'] },
+  { to: '/app/mercaderia', icon: <FiPackage />, label: 'Mercaderia', rolesPermitidos: ['Dueño', 'Dueno', 'Administrador'] },
+  { to: '/app/recetas', icon: <FiBookOpen />, label: 'Recetas', rolesPermitidos: ['Dueño', 'Dueno', 'Administrador'] },
   { to: '/app/reportes', icon: <FiBarChart2 />, label: 'Reportes' },
   { to: '/app/usuarios', icon: <FiUsers />, label: 'Usuarios', rolesPermitidos: ['Dueño', 'Dueno'] },
   { to: '/app/mi-negocio', icon: <FiHome />, label: 'Mi Negocio', rolesPermitidos: ['Dueño', 'Dueno'] },
-  { to: '/app/configuracion', icon: <FiSettings />, label: 'Configuracion' },
+  { to: '/app/configuracion', icon: <FiSettings />, label: 'Configuracion', rolesPermitidos: ['Dueño', 'Dueno', 'Administrador'] },
 ];
 
 const superAdminNavItems: NavItem[] = [

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { reportesService } from '../services/api';
 import { motion } from 'framer-motion';
 import { FiBarChart2, FiCalendar, FiTrendingUp, FiPieChart, FiDollarSign } from 'react-icons/fi';
@@ -16,6 +16,8 @@ export default function Reportes() {
   const [porCategoria, setPorCategoria] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [tabActiva, setTabActiva] = useState('resumen');
+
+  useEffect(() => { cargar(); }, []);
 
   const cargar = async () => {
     setLoading(true);
