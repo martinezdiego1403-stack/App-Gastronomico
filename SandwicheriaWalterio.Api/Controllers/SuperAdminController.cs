@@ -59,21 +59,18 @@ namespace SandwicheriaWalterio.Api.Controllers
                 .OrderByDescending(t => t.FechaCreacion)
                 .ToList();
 
-            // Contar por separado para evitar problemas con IgnoreQueryFilters en subqueries
-            var usuarios = _db.Usuarios.IgnoreQueryFilters()
-                .GroupBy(u => u.TenantId)
-                .Select(g => new { TenantId = g.Key, Cantidad = g.Count() })
-                .ToDictionary(x => x.TenantId, x => x.Cantidad);
+            // Traer IDs a memoria y contar en C# para evitar problemas con IgnoreQueryFilters + GroupBy en PostgreSQL
+            var usuariosTenants = _db.Usuarios.IgnoreQueryFilters()
+                .Select(u => u.TenantId).ToList()
+                .GroupBy(t => t).ToDictionary(g => g.Key, g => g.Count());
 
-            var ventas = _db.Ventas.IgnoreQueryFilters()
-                .GroupBy(v => v.TenantId)
-                .Select(g => new { TenantId = g.Key, Cantidad = g.Count() })
-                .ToDictionary(x => x.TenantId, x => x.Cantidad);
+            var ventasTenants = _db.Ventas.IgnoreQueryFilters()
+                .Select(v => v.TenantId).ToList()
+                .GroupBy(t => t).ToDictionary(g => g.Key, g => g.Count());
 
-            var productos = _db.Productos.IgnoreQueryFilters()
-                .GroupBy(p => p.TenantId)
-                .Select(g => new { TenantId = g.Key, Cantidad = g.Count() })
-                .ToDictionary(x => x.TenantId, x => x.Cantidad);
+            var productosTenants = _db.Productos.IgnoreQueryFilters()
+                .Select(p => p.TenantId).ToList()
+                .GroupBy(t => t).ToDictionary(g => g.Key, g => g.Count());
 
             var resultado = tenants.Select(t => new
             {
@@ -87,9 +84,9 @@ namespace SandwicheriaWalterio.Api.Controllers
                 t.EmailContacto,
                 t.Telefono,
                 t.UsuarioDuenoID,
-                cantidadUsuarios = usuarios.GetValueOrDefault(t.TenantId, 0),
-                cantidadVentas = ventas.GetValueOrDefault(t.TenantId, 0),
-                cantidadProductos = productos.GetValueOrDefault(t.TenantId, 0)
+                cantidadUsuarios = usuariosTenants.GetValueOrDefault(t.TenantId, 0),
+                cantidadVentas = ventasTenants.GetValueOrDefault(t.TenantId, 0),
+                cantidadProductos = productosTenants.GetValueOrDefault(t.TenantId, 0)
             });
 
             return Ok(resultado);
