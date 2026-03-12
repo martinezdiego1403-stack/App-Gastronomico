@@ -44,8 +44,8 @@ export const authService = {
   register: (data: { nombreUsuario: string; nombreCompleto: string; email: string; contrasena: string }) =>
     api.post('/auth/register', { NombreUsuario: data.nombreUsuario, NombreCompleto: data.nombreCompleto, Email: data.email, Contrasena: data.contrasena }),
 
-  loginEmpleado: (nombreUsuario: string, nombreNegocio: string) =>
-    api.post('/auth/login-empleado', { NombreUsuario: nombreUsuario, NombreNegocio: nombreNegocio }),
+  loginEmpleado: (nombreUsuario: string, nombreNegocio: string, contrasenaLocal?: string) =>
+    api.post('/auth/login-empleado', { NombreUsuario: nombreUsuario, NombreNegocio: nombreNegocio, ContrasenaLocal: contrasenaLocal || null }),
 
   registroNegocio: (data: {
     nombreUsuario: string; nombreCompleto: string; email: string;

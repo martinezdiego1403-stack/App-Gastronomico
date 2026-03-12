@@ -18,6 +18,11 @@ namespace SandwicheriaWalterio.DTOs.Auth
 
         [Required]
         public string NombreNegocio { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Contraseña del dueño del local. Requerida solo en planes Pro y Pro+.
+        /// </summary>
+        public string? ContrasenaLocal { get; set; }
     }
 
     public class RegisterRequest

@@ -13,6 +13,7 @@ export default function Login() {
   const [nombreNegocio, setNombreNegocio] = useState('');
   const [nombreUsuario, setNombreUsuario] = useState('');
   const [contrasena, setContrasena] = useState('');
+  const [contrasenaLocal, setContrasenaLocal] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { login, loginWithToken } = useAuth();
@@ -50,7 +51,7 @@ export default function Login() {
     setError('');
     setLoading(true);
     try {
-      const res = await authService.loginEmpleado(nombreUsuario, nombreNegocio);
+      const res = await authService.loginEmpleado(nombreUsuario, nombreNegocio, contrasenaLocal || undefined);
       const data = res.data;
       if (data.exitoso) {
         loginWithToken(data.token, data.usuario, data.tenant);
@@ -70,6 +71,7 @@ export default function Login() {
     setError('');
     setNombreUsuario('');
     setContrasena('');
+    setContrasenaLocal('');
     setNombreNegocio('');
   };
 
@@ -125,7 +127,7 @@ export default function Login() {
                 >
                   <FiHome className="login-role-icon" />
                   <span className="login-role-name">Soy Empleado</span>
-                  <span className="login-role-desc">Acceso rapido sin contraseña</span>
+                  <span className="login-role-desc">Acceso con clave del local</span>
                 </button>
               </div>
             </motion.div>
@@ -214,6 +216,17 @@ export default function Login() {
                     onChange={e => setNombreUsuario(e.target.value)}
                   />
                 </div>
+
+                <div className="input-group">
+                  <FiLock className="input-icon" />
+                  <input
+                    type="password"
+                    placeholder="Clave del local (planes Pro)"
+                    value={contrasenaLocal}
+                    onChange={e => setContrasenaLocal(e.target.value)}
+                  />
+                </div>
+                <p className="login-hint">Solo requerida en planes Pro y Pro+</p>
 
                 {error && (
                   <motion.div

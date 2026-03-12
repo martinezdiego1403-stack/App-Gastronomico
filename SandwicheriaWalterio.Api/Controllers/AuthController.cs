@@ -105,6 +105,28 @@ namespace SandwicheriaWalterio.Api.Controllers
             if (tenant.TrialExpirado)
                 return Ok(new LoginResponse { Exitoso = false, Mensaje = "El periodo de prueba de este negocio ha expirado" });
 
+            // Planes Pro y Pro+ requieren contraseña del dueño
+            var planesConContrasena = new[] { "Pro", "Pro+" };
+            if (planesConContrasena.Contains(tenant.Plan))
+            {
+                if (string.IsNullOrEmpty(request.ContrasenaLocal))
+                    return Ok(new LoginResponse { Exitoso = false, Mensaje = "Este local requiere contraseña del dueño para ingresar" });
+
+                var dueno = _db.Usuarios
+                    .IgnoreQueryFilters()
+                    .FirstOrDefault(u => u.UsuarioID == tenant.UsuarioDuenoID);
+
+                if (dueno == null)
+                    return Ok(new LoginResponse { Exitoso = false, Mensaje = "No se encontró al dueño del negocio" });
+
+                bool contrasenaValida = false;
+                try { contrasenaValida = BCrypt.Net.BCrypt.Verify(request.ContrasenaLocal, dueno.Contraseña); }
+                catch { contrasenaValida = false; }
+
+                if (!contrasenaValida)
+                    return Ok(new LoginResponse { Exitoso = false, Mensaje = "Contraseña del local incorrecta" });
+            }
+
             // Buscar el usuario dentro del tenant con rol Empleado
             var usuario = _db.Usuarios
                 .IgnoreQueryFilters()
