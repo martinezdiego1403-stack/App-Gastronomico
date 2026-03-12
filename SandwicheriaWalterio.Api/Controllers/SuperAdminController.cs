@@ -150,7 +150,7 @@ namespace SandwicheriaWalterio.Api.Controllers
                 return NotFound(new { error = "Tenant no encontrado" });
 
             // Validar planes permitidos
-            var planesValidos = new[] { "Trial", "Mensual", "DePorVida" };
+            var planesValidos = new[] { "Trial", "Pro", "Pro+", "ProForever" };
             if (!planesValidos.Contains(request.Plan))
                 return BadRequest(new { error = $"Plan invalido. Planes validos: {string.Join(", ", planesValidos)}" });
 

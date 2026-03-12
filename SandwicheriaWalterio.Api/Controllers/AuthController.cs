@@ -328,6 +328,53 @@ namespace SandwicheriaWalterio.Api.Controllers
             });
         }
 
+        /// <summary>
+        /// POST /api/auth/setup-admin (crea SuperAdmin si no existe - solo funciona una vez)
+        /// </summary>
+        [HttpPost("setup-admin")]
+        public IActionResult SetupAdmin([FromBody] SetupAdminRequest request)
+        {
+            // Clave secreta para proteger este endpoint
+            if (request.ClaveSetup != "GastronomiApp2026!")
+                return Unauthorized(new { error = "Clave de setup incorrecta" });
+
+            // Solo funciona si no existe un SuperAdmin
+            if (_db.Usuarios.IgnoreQueryFilters().Any(u => u.Rol == "SuperAdmin"))
+                return BadRequest(new { error = "Ya existe un SuperAdmin" });
+
+            var usuario = new Usuario
+            {
+                NombreUsuario = request.NombreUsuario,
+                NombreCompleto = request.NombreCompleto,
+                Email = request.Email,
+                Contraseña = BCrypt.Net.BCrypt.HashPassword(request.Contrasena),
+                Rol = "SuperAdmin",
+                Activo = true,
+                FechaCreacion = DateTime.UtcNow,
+                TenantId = "platform"
+            };
+
+            _db.Usuarios.Add(usuario);
+            _db.SaveChangesWithoutFilters();
+
+            var token = _jwtService.GenerarToken(usuario.UsuarioID, usuario.NombreUsuario, usuario.Rol, "platform");
+
+            return Ok(new LoginResponse
+            {
+                Exitoso = true,
+                Token = token,
+                Mensaje = "SuperAdmin creado exitosamente",
+                Usuario = new UsuarioInfo
+                {
+                    UsuarioID = usuario.UsuarioID,
+                    NombreUsuario = usuario.NombreUsuario,
+                    NombreCompleto = usuario.NombreCompleto,
+                    Rol = usuario.Rol,
+                    Email = usuario.Email
+                }
+            });
+        }
+
         private void CrearDatosIniciales(string tenantId)
         {
             var categorias = new[]

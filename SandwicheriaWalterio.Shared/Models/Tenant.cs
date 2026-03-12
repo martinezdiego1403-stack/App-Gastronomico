@@ -28,7 +28,7 @@ namespace SandwicheriaWalterio.Models
         public string NombreNegocio { get; set; } = "Mi Negocio";
 
         /// <summary>
-        /// Plan actual: "Trial", "Basico", "Pro"
+        /// Plan actual: "Trial", "Pro", "Pro+", "ProForever"
         /// </summary>
         [Required]
         [MaxLength(20)]

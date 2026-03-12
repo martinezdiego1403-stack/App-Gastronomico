@@ -46,6 +46,27 @@ namespace SandwicheriaWalterio.DTOs.Auth
         public string Rol { get; set; } = "Empleado";
     }
 
+    public class SetupAdminRequest
+    {
+        [Required]
+        public string ClaveSetup { get; set; } = string.Empty;
+
+        [Required]
+        [MaxLength(50)]
+        public string NombreUsuario { get; set; } = string.Empty;
+
+        [Required]
+        [MaxLength(100)]
+        public string NombreCompleto { get; set; } = string.Empty;
+
+        [MaxLength(100)]
+        public string? Email { get; set; }
+
+        [Required]
+        [MinLength(4)]
+        public string Contrasena { get; set; } = string.Empty;
+    }
+
     public class LoginResponse
     {
         public bool Exitoso { get; set; }
