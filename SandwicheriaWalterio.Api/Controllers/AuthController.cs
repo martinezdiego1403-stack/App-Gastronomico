@@ -375,6 +375,51 @@ namespace SandwicheriaWalterio.Api.Controllers
             });
         }
 
+        /// <summary>
+        /// POST /api/auth/reset-admin (resetea contraseña del SuperAdmin)
+        /// </summary>
+        [HttpPost("reset-admin")]
+        public IActionResult ResetAdmin([FromBody] SetupAdminRequest request)
+        {
+            if (request.ClaveSetup != "GastronomiApp2026!")
+                return Unauthorized(new { error = "Clave de setup incorrecta" });
+
+            var admin = _db.Usuarios.IgnoreQueryFilters()
+                .FirstOrDefault(u => u.Rol == "SuperAdmin" && u.NombreUsuario == request.NombreUsuario);
+
+            if (admin == null)
+                return NotFound(new { error = "SuperAdmin no encontrado" });
+
+            admin.Contraseña = BCrypt.Net.BCrypt.HashPassword(request.Contrasena);
+            _db.SaveChangesWithoutFilters();
+
+            return Ok(new { mensaje = "Contraseña del SuperAdmin reseteada" });
+        }
+
+        /// <summary>
+        /// DELETE /api/auth/delete-user (elimina un usuario por nombre - protegido con clave)
+        /// </summary>
+        [HttpDelete("delete-user")]
+        public IActionResult DeleteUser([FromQuery] string claveSetup, [FromQuery] string nombreUsuario)
+        {
+            if (claveSetup != "GastronomiApp2026!")
+                return Unauthorized(new { error = "Clave de setup incorrecta" });
+
+            var usuario = _db.Usuarios.IgnoreQueryFilters()
+                .FirstOrDefault(u => u.NombreUsuario == nombreUsuario);
+
+            if (usuario == null)
+                return NotFound(new { error = "Usuario no encontrado" });
+
+            if (usuario.Rol == "SuperAdmin")
+                return BadRequest(new { error = "No se puede eliminar un SuperAdmin" });
+
+            _db.Usuarios.Remove(usuario);
+            _db.SaveChangesWithoutFilters();
+
+            return Ok(new { mensaje = $"Usuario '{nombreUsuario}' eliminado" });
+        }
+
         private void CrearDatosIniciales(string tenantId)
         {
             var categorias = new[]
