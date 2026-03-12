@@ -11,6 +11,15 @@ namespace SandwicheriaWalterio.DTOs.Auth
         public string Contraseña { get; set; } = string.Empty;
     }
 
+    public class LoginEmpleadoRequest
+    {
+        [Required]
+        public string NombreUsuario { get; set; } = string.Empty;
+
+        [Required]
+        public string NombreNegocio { get; set; } = string.Empty;
+    }
+
     public class RegisterRequest
     {
         [Required]

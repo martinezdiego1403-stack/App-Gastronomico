@@ -1,20 +1,25 @@
 import { useState, FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { motion } from 'framer-motion';
-import { FiUser, FiLock, FiLogIn, FiSun, FiMoon } from 'react-icons/fi';
+import { authService } from '../services/api';
+import { motion, AnimatePresence } from 'framer-motion';
+import { FiUser, FiLock, FiLogIn, FiSun, FiMoon, FiHome, FiArrowLeft } from 'react-icons/fi';
 import { useTheme } from '../context/ThemeContext';
 
+type TipoUsuario = null | 'dueno' | 'empleado';
+
 export default function Login() {
+  const [tipoUsuario, setTipoUsuario] = useState<TipoUsuario>(null);
+  const [nombreNegocio, setNombreNegocio] = useState('');
   const [nombreUsuario, setNombreUsuario] = useState('');
   const [contrasena, setContrasena] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, loginWithToken } = useAuth();
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleLoginDueno = async (e: FormEvent) => {
     e.preventDefault();
     if (!nombreUsuario.trim()) {
       setError('Ingresa tu nombre de usuario');
@@ -30,6 +35,42 @@ export default function Login() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleLoginEmpleado = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!nombreNegocio.trim()) {
+      setError('Ingresa el nombre del local');
+      return;
+    }
+    if (!nombreUsuario.trim()) {
+      setError('Ingresa tu nombre de usuario');
+      return;
+    }
+    setError('');
+    setLoading(true);
+    try {
+      const res = await authService.loginEmpleado(nombreUsuario, nombreNegocio);
+      const data = res.data;
+      if (data.exitoso) {
+        loginWithToken(data.token, data.usuario, data.tenant);
+        navigate('/app');
+      } else {
+        setError(data.mensaje || 'Error al iniciar sesion');
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.error || err.message || 'Error al iniciar sesion');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const volver = () => {
+    setTipoUsuario(null);
+    setError('');
+    setNombreUsuario('');
+    setContrasena('');
+    setNombreNegocio('');
   };
 
   return (
@@ -58,43 +99,140 @@ export default function Login() {
           <p className="logo-subtitle">Sistema de Gestion</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="login-form">
-          <div className="input-group">
-            <FiUser className="input-icon" />
-            <input
-              type="text"
-              placeholder="Nombre de usuario"
-              value={nombreUsuario}
-              onChange={e => setNombreUsuario(e.target.value)}
-              autoFocus
-            />
-          </div>
-
-          <div className="input-group">
-            <FiLock className="input-icon" />
-            <input
-              type="password"
-              placeholder="Contrasena"
-              value={contrasena}
-              onChange={e => setContrasena(e.target.value)}
-            />
-          </div>
-
-          {error && (
+        <AnimatePresence mode="wait">
+          {/* Paso 1: Elegir tipo de usuario */}
+          {tipoUsuario === null && (
             <motion.div
-              className="login-error"
-              initial={{ opacity: 0, x: -10 }}
+              key="selector"
+              initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="login-selector"
             >
-              {error}
+              <p className="login-selector-title">Como queres ingresar?</p>
+              <div className="login-role-buttons">
+                <button
+                  className="login-role-btn dueno"
+                  onClick={() => setTipoUsuario('dueno')}
+                >
+                  <FiUser className="login-role-icon" />
+                  <span className="login-role-name">Soy Dueño / Admin</span>
+                  <span className="login-role-desc">Acceso completo con contraseña</span>
+                </button>
+                <button
+                  className="login-role-btn empleado"
+                  onClick={() => setTipoUsuario('empleado')}
+                >
+                  <FiHome className="login-role-icon" />
+                  <span className="login-role-name">Soy Empleado</span>
+                  <span className="login-role-desc">Acceso rapido sin contraseña</span>
+                </button>
+              </div>
             </motion.div>
           )}
 
-          <button type="submit" className="btn-login" disabled={loading}>
-            <FiLogIn />
-            <span>{loading ? 'Ingresando...' : 'Ingresar'}</span>
-          </button>
-        </form>
+          {/* Paso 2a: Login Dueño/Admin */}
+          {tipoUsuario === 'dueno' && (
+            <motion.div
+              key="dueno"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+            >
+              <button className="login-back-btn" onClick={volver}>
+                <FiArrowLeft /> Volver
+              </button>
+              <form onSubmit={handleLoginDueno} className="login-form">
+                <div className="input-group">
+                  <FiUser className="input-icon" />
+                  <input
+                    type="text"
+                    placeholder="Nombre de usuario"
+                    value={nombreUsuario}
+                    onChange={e => setNombreUsuario(e.target.value)}
+                    autoFocus
+                  />
+                </div>
+
+                <div className="input-group">
+                  <FiLock className="input-icon" />
+                  <input
+                    type="password"
+                    placeholder="Contrasena"
+                    value={contrasena}
+                    onChange={e => setContrasena(e.target.value)}
+                  />
+                </div>
+
+                {error && (
+                  <motion.div
+                    className="login-error"
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                  >
+                    {error}
+                  </motion.div>
+                )}
+
+                <button type="submit" className="btn-login" disabled={loading}>
+                  <FiLogIn />
+                  <span>{loading ? 'Ingresando...' : 'Ingresar'}</span>
+                </button>
+              </form>
+            </motion.div>
+          )}
+
+          {/* Paso 2b: Login Empleado */}
+          {tipoUsuario === 'empleado' && (
+            <motion.div
+              key="empleado"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+            >
+              <button className="login-back-btn" onClick={volver}>
+                <FiArrowLeft /> Volver
+              </button>
+              <form onSubmit={handleLoginEmpleado} className="login-form">
+                <div className="input-group">
+                  <FiHome className="input-icon" />
+                  <input
+                    type="text"
+                    placeholder="Nombre del local"
+                    value={nombreNegocio}
+                    onChange={e => setNombreNegocio(e.target.value)}
+                    autoFocus
+                  />
+                </div>
+
+                <div className="input-group">
+                  <FiUser className="input-icon" />
+                  <input
+                    type="text"
+                    placeholder="Tu nombre de usuario"
+                    value={nombreUsuario}
+                    onChange={e => setNombreUsuario(e.target.value)}
+                  />
+                </div>
+
+                {error && (
+                  <motion.div
+                    className="login-error"
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                  >
+                    {error}
+                  </motion.div>
+                )}
+
+                <button type="submit" className="btn-login" disabled={loading}>
+                  <FiLogIn />
+                  <span>{loading ? 'Ingresando...' : 'Ingresar'}</span>
+                </button>
+              </form>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <p className="login-footer">
           No tenes cuenta? <Link to="/registro" className="link-accent">Registra tu negocio</Link>

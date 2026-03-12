@@ -90,6 +90,68 @@ namespace SandwicheriaWalterio.Api.Controllers
         }
 
         /// <summary>
+        /// POST /api/auth/login-empleado (login sin contraseña para empleados)
+        /// </summary>
+        [HttpPost("login-empleado")]
+        public IActionResult LoginEmpleado([FromBody] LoginEmpleadoRequest request)
+        {
+            // Buscar el tenant por nombre de negocio
+            var tenant = _db.Tenants
+                .FirstOrDefault(t => t.NombreNegocio.ToLower() == request.NombreNegocio.ToLower().Trim() && t.Activo);
+
+            if (tenant == null)
+                return Ok(new LoginResponse { Exitoso = false, Mensaje = "No se encontró un negocio con ese nombre" });
+
+            if (tenant.TrialExpirado)
+                return Ok(new LoginResponse { Exitoso = false, Mensaje = "El periodo de prueba de este negocio ha expirado" });
+
+            // Buscar el usuario dentro del tenant con rol Empleado
+            var usuario = _db.Usuarios
+                .IgnoreQueryFilters()
+                .FirstOrDefault(u => u.NombreUsuario == request.NombreUsuario.Trim()
+                    && u.TenantId == tenant.TenantId
+                    && u.Rol == "Empleado");
+
+            if (usuario == null)
+                return Ok(new LoginResponse { Exitoso = false, Mensaje = "Empleado no encontrado en este negocio" });
+
+            if (!usuario.Activo)
+                return Ok(new LoginResponse { Exitoso = false, Mensaje = "Tu cuenta está desactivada. Contacta al dueño." });
+
+            if (usuario.EstaBloqueado)
+                return Ok(new LoginResponse { Exitoso = false, Mensaje = $"Usuario bloqueado hasta {usuario.BloqueadoHasta:HH:mm}" });
+
+            usuario.UltimoAcceso = DateTime.UtcNow;
+            _db.SaveChangesWithoutFilters();
+
+            var token = _jwtService.GenerarToken(usuario.UsuarioID, usuario.NombreUsuario, usuario.Rol, usuario.TenantId);
+
+            return Ok(new LoginResponseSaaS
+            {
+                Exitoso = true,
+                Token = token,
+                Mensaje = "Login exitoso",
+                Usuario = new UsuarioInfo
+                {
+                    UsuarioID = usuario.UsuarioID,
+                    NombreUsuario = usuario.NombreUsuario,
+                    NombreCompleto = usuario.NombreCompleto,
+                    Rol = usuario.Rol,
+                    Email = usuario.Email
+                },
+                Tenant = new TenantInfo
+                {
+                    TenantId = tenant.TenantId,
+                    NombreNegocio = tenant.NombreNegocio,
+                    Plan = tenant.Plan,
+                    Activo = tenant.Activo,
+                    DiasRestantesTrial = tenant.DiasRestantesTrial,
+                    TrialExpirado = tenant.TrialExpirado
+                }
+            });
+        }
+
+        /// <summary>
         /// POST /api/auth/register (registro interno - agrega empleado al tenant actual)
         /// </summary>
         [HttpPost("register")]

@@ -44,6 +44,9 @@ export const authService = {
   register: (data: { nombreUsuario: string; nombreCompleto: string; email: string; contraseña: string }) =>
     api.post('/auth/register', { NombreUsuario: data.nombreUsuario, NombreCompleto: data.nombreCompleto, Email: data.email, 'Contraseña': data.contraseña }),
 
+  loginEmpleado: (nombreUsuario: string, nombreNegocio: string) =>
+    api.post('/auth/login-empleado', { NombreUsuario: nombreUsuario, NombreNegocio: nombreNegocio }),
+
   registroNegocio: (data: {
     nombreUsuario: string; nombreCompleto: string; email: string;
     contraseña: string; nombreNegocio: string; telefono?: string;
