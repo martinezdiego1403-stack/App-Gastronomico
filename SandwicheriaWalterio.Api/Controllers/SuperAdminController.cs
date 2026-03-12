@@ -59,58 +59,22 @@ namespace SandwicheriaWalterio.Api.Controllers
             {
                 var tenants = _db.Tenants
                     .OrderByDescending(t => t.FechaCreacion)
+                    .Select(t => new
+                    {
+                        t.TenantID,
+                        t.TenantId,
+                        t.NombreNegocio,
+                        t.Plan,
+                        t.Activo,
+                        t.FechaCreacion,
+                        t.FechaExpiracionTrial,
+                        t.EmailContacto,
+                        t.Telefono,
+                        t.UsuarioDuenoID
+                    })
                     .ToList();
 
-                // Conteos usando SQL directo para evitar problemas con IgnoreQueryFilters
-                var conn = _db.Database.GetDbConnection();
-                if (conn.State != System.Data.ConnectionState.Open) conn.Open();
-
-                var usuariosCounts = new Dictionary<string, int>();
-                var ventasCounts = new Dictionary<string, int>();
-                var productosCounts = new Dictionary<string, int>();
-
-                using (var cmd = conn.CreateCommand())
-                {
-                    cmd.CommandText = "SELECT \"TenantId\", COUNT(*) FROM \"Usuarios\" GROUP BY \"TenantId\"";
-                    using var reader = cmd.ExecuteReader();
-                    while (reader.Read())
-                        usuariosCounts[reader.GetString(0)] = reader.GetInt32(1);
-                }
-
-                using (var cmd = conn.CreateCommand())
-                {
-                    cmd.CommandText = "SELECT \"TenantId\", COUNT(*) FROM \"Ventas\" GROUP BY \"TenantId\"";
-                    using var reader = cmd.ExecuteReader();
-                    while (reader.Read())
-                        ventasCounts[reader.GetString(0)] = reader.GetInt32(1);
-                }
-
-                using (var cmd = conn.CreateCommand())
-                {
-                    cmd.CommandText = "SELECT \"TenantId\", COUNT(*) FROM \"Productos\" GROUP BY \"TenantId\"";
-                    using var reader = cmd.ExecuteReader();
-                    while (reader.Read())
-                        productosCounts[reader.GetString(0)] = reader.GetInt32(1);
-                }
-
-                var resultado = tenants.Select(t => new
-                {
-                    t.TenantID,
-                    t.TenantId,
-                    t.NombreNegocio,
-                    t.Plan,
-                    t.Activo,
-                    t.FechaCreacion,
-                    t.FechaExpiracionTrial,
-                    t.EmailContacto,
-                    t.Telefono,
-                    t.UsuarioDuenoID,
-                    cantidadUsuarios = usuariosCounts.GetValueOrDefault(t.TenantId, 0),
-                    cantidadVentas = ventasCounts.GetValueOrDefault(t.TenantId, 0),
-                    cantidadProductos = productosCounts.GetValueOrDefault(t.TenantId, 0)
-                });
-
-                return Ok(resultado);
+                return Ok(tenants);
             }
             catch (Exception ex)
             {
