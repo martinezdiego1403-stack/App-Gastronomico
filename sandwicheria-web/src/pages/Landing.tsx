@@ -33,7 +33,7 @@ const planes = [
     tag: 'Mensual',
     precioUsd: '$18',
     precioArs: '$26.000 ARS',
-    periodo: 'USD / mes',
+    periodo: 'USD o USDT / mes',
     features: [
       'Todo lo del Free Trial',
       'Acceso completo via web',
@@ -51,7 +51,7 @@ const planes = [
     tag: 'Anual',
     precioUsd: '$180',
     precioArs: '$260.000 ARS',
-    periodo: 'USD / año',
+    periodo: 'USD o USDT / año',
     features: [
       'Todo lo del plan Pro',
       'Personalizacion de logos',
@@ -67,7 +67,7 @@ const planes = [
     tag: 'Pago unico',
     precioUsd: '$250',
     precioArs: '$355.000 ARS',
-    periodo: 'USD pago unico',
+    periodo: 'USD o USDT pago unico',
     features: [
       'Todo lo del plan Pro+',
       'App instalada en tu PC',
