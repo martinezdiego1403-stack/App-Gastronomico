@@ -88,7 +88,15 @@ namespace SandwicheriaWalterio.Api.Controllers
         [HttpGet("ping")]
         public IActionResult Ping()
         {
-            return Ok(new { mensaje = "SuperAdmin OK", timestamp = DateTime.UtcNow });
+            try
+            {
+                var count = _db.Tenants.Count();
+                return Ok(new { mensaje = "SuperAdmin OK", timestamp = DateTime.UtcNow, tenantsCount = count });
+            }
+            catch (Exception ex)
+            {
+                return Ok(new { mensaje = "Error en DB", error = ex.Message, inner = ex.InnerException?.Message });
+            }
         }
 
         /// <summary>
