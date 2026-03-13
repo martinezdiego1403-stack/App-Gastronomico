@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { pagosService } from '../services/api';
-import { motion, AnimatePresence } from 'framer-motion';
-import { FiCopy, FiCheck, FiUpload, FiClock, FiCheckCircle, FiXCircle, FiArrowLeft } from 'react-icons/fi';
+import { motion } from 'framer-motion';
+import { FiCopy, FiCheck, FiClock, FiCheckCircle, FiXCircle, FiArrowLeft, FiMessageCircle } from 'react-icons/fi';
 
 interface PlanInfo {
   nombre: string;
@@ -36,20 +36,17 @@ interface Solicitud {
 
 type MetodoPago = 'CVU_ARS' | 'USDT_BEP20' | 'USDT_TRC20';
 
+// Numero de WhatsApp de soporte (sin +)
+const WPP_NUMERO = '5491112345678'; // TODO: reemplazar con tu numero real
+
 export default function Upgrade() {
   const [info, setInfo] = useState<PagoInfo | null>(null);
   const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
   const [loading, setLoading] = useState(true);
   const [planSeleccionado, setPlanSeleccionado] = useState<string | null>(null);
   const [metodoPago, setMetodoPago] = useState<MetodoPago>('CVU_ARS');
-  const [referencia, setReferencia] = useState('');
-  const [monto, setMonto] = useState('');
-  const [archivo, setArchivo] = useState<File | null>(null);
-  const [enviando, setEnviando] = useState(false);
-  const [mensaje, setMensaje] = useState('');
   const [error, setError] = useState('');
   const [copiado, setCopiado] = useState('');
-  const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     cargar();
@@ -63,8 +60,6 @@ export default function Upgrade() {
       ]);
       setInfo(infoRes.data);
       setSolicitudes(solRes.data);
-
-      // Auto-setear monto segun plan y metodo
     } catch {
       setError('Error al cargar informacion');
     } finally {
@@ -94,42 +89,31 @@ export default function Upgrade() {
     return info.metodosPago.usdtTrc20;
   };
 
-  const enviarSolicitud = async () => {
-    if (!planSeleccionado || !archivo) {
-      setError('Selecciona un plan y subi el comprobante');
-      return;
-    }
+  const getMetodoLabel = () => {
+    if (metodoPago === 'CVU_ARS') return 'Transferencia bancaria (CVU)';
+    if (metodoPago === 'USDT_BEP20') return 'USDT Red BEP20';
+    return 'USDT Red TRC20';
+  };
 
-    setEnviando(true);
-    setError('');
-    setMensaje('');
+  const enviarWhatsApp = () => {
+    if (!info || !planSeleccionado) return;
+    const precio = getPrecio();
+    const moneda = getMoneda();
+    const metodo = getMetodoLabel();
 
-    const formData = new FormData();
-    formData.append('PlanSolicitado', planSeleccionado);
-    formData.append('MetodoPago', metodoPago);
-    formData.append('MontoDeclarado', monto || getPrecio().toString());
-    formData.append('Comprobante', archivo);
-    if (referencia) formData.append('ReferenciaTransferencia', referencia);
+    const msg = `Hola! Quiero activar el plan *${planSeleccionado}* para mi negocio *${info.nombreNegocio}*.\n\n`
+      + `Metodo de pago: ${metodo}\n`
+      + `Monto: $${moneda === 'ARS' ? precio.toLocaleString('es-AR') : precio} ${moneda}\n\n`
+      + `Adjunto el comprobante de pago.`;
 
-    try {
-      const res = await pagosService.solicitar(formData);
-      setMensaje(res.data.mensaje);
-      setPlanSeleccionado(null);
-      setArchivo(null);
-      setReferencia('');
-      setMonto('');
-      cargar();
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Error al enviar solicitud');
-    } finally {
-      setEnviando(false);
-    }
+    const url = `https://wa.me/${WPP_NUMERO}?text=${encodeURIComponent(msg)}`;
+    window.open(url, '_blank');
   };
 
   const tienePendiente = solicitudes.some(s => s.estado === 'Pendiente');
 
   if (loading) return <div className="page-loading">Cargando...</div>;
-  if (!info) return <div className="page-error">Error al cargar datos</div>;
+  if (!info) return <div className="page-error" style={{ padding: '2rem', color: '#e63946' }}>{error || 'Error al cargar datos'}</div>;
 
   const planActualLabel = info.planActual === 'Pro+' ? 'Pro+ (Anual)' : info.planActual === 'Pro' ? 'Pro (Mensual)' : info.planActual;
   const yaEsMax = info.planActual === 'Pro+' || info.planActual === 'ProForever';
@@ -140,12 +124,6 @@ export default function Upgrade() {
         <h1>Upgrade de Plan</h1>
         <p>Plan actual: <strong>{planActualLabel}</strong></p>
       </div>
-
-      {mensaje && (
-        <motion.div className="upgrade-success" initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-          <FiCheckCircle /> {mensaje}
-        </motion.div>
-      )}
 
       {error && (
         <motion.div className="upgrade-error" initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
@@ -167,10 +145,7 @@ export default function Upgrade() {
               key={plan.nombre}
               className="upgrade-plan-card"
               whileHover={{ scale: 1.02 }}
-              onClick={() => {
-                setPlanSeleccionado(plan.nombre);
-                setMonto(metodoPago === 'CVU_ARS' ? plan.precioARS.toString() : plan.precioUSDT.toString());
-              }}
+              onClick={() => setPlanSeleccionado(plan.nombre)}
             >
               <h3>{plan.nombre}</h3>
               <span className="upgrade-plan-tipo">{plan.tipo}</span>
@@ -190,7 +165,7 @@ export default function Upgrade() {
           ))}
         </div>
       ) : (
-        /* Paso 2: Pagar y subir comprobante */
+        /* Paso 2: Datos de pago + enviar por WhatsApp */
         <motion.div className="upgrade-pago" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
           <button className="upgrade-back" onClick={() => setPlanSeleccionado(null)}>
             <FiArrowLeft /> Cambiar plan
@@ -206,11 +181,7 @@ export default function Upgrade() {
                 <button
                   key={m}
                   className={`upgrade-metodo-btn ${metodoPago === m ? 'active' : ''}`}
-                  onClick={() => {
-                    setMetodoPago(m);
-                    const plan = info.planes.find(p => p.nombre === planSeleccionado);
-                    if (plan) setMonto(m === 'CVU_ARS' ? plan.precioARS.toString() : plan.precioUSDT.toString());
-                  }}
+                  onClick={() => setMetodoPago(m)}
                 >
                   {m === 'CVU_ARS' ? 'Transferencia ARS' : m === 'USDT_BEP20' ? 'USDT (BEP20)' : 'USDT (TRC20)'}
                 </button>
@@ -220,10 +191,10 @@ export default function Upgrade() {
 
           {/* Datos de pago */}
           <div className="upgrade-datos-pago">
-            <label>{metodoPago === 'CVU_ARS' ? 'CVU:' : `Direccion ${metodoPago === 'USDT_BEP20' ? 'BEP20' : 'TRC20'}:`}</label>
+            <label>{metodoPago === 'CVU_ARS' ? 'CVU para transferir:' : `Direccion ${metodoPago === 'USDT_BEP20' ? 'BEP20' : 'TRC20'}:`}</label>
             <div className="upgrade-direccion">
               <code>{getDireccion()}</code>
-              <button className="upgrade-copiar" onClick={() => copiar(getDireccion(), metodoPago)}>
+              <button className="upgrade-copiar" onClick={() => copiar(getDireccion(), metodoPago)} title="Copiar">
                 {copiado === metodoPago ? <FiCheck /> : <FiCopy />}
               </button>
             </div>
@@ -232,53 +203,25 @@ export default function Upgrade() {
             </p>
           </div>
 
-          {/* Formulario */}
-          <div className="upgrade-form">
-            <div className="upgrade-form-group">
-              <label>Monto transferido</label>
-              <input
-                type="number"
-                value={monto}
-                onChange={e => setMonto(e.target.value)}
-                placeholder={`Monto en ${getMoneda()}`}
-              />
-            </div>
-
-            <div className="upgrade-form-group">
-              <label>Referencia / Hash (opcional)</label>
-              <input
-                type="text"
-                value={referencia}
-                onChange={e => setReferencia(e.target.value)}
-                placeholder="Nro de operacion o TX hash"
-              />
-            </div>
-
-            <div className="upgrade-form-group">
-              <label>Comprobante de pago *</label>
-              <div
-                className={`upgrade-upload ${archivo ? 'has-file' : ''}`}
-                onClick={() => fileRef.current?.click()}
-              >
-                <input
-                  ref={fileRef}
-                  type="file"
-                  accept="image/png,image/jpeg,image/jpg"
-                  onChange={e => setArchivo(e.target.files?.[0] || null)}
-                  style={{ display: 'none' }}
-                />
-                {archivo ? (
-                  <span><FiCheck /> {archivo.name}</span>
-                ) : (
-                  <span><FiUpload /> Click para subir captura (JPG/PNG, max 5MB)</span>
-                )}
-              </div>
-            </div>
-
-            <button className="btn btn-primary upgrade-enviar" onClick={enviarSolicitud} disabled={enviando || !archivo}>
-              {enviando ? 'Enviando...' : 'Enviar solicitud de upgrade'}
-            </button>
+          {/* Instrucciones */}
+          <div className="upgrade-instrucciones">
+            <h3>Pasos a seguir:</h3>
+            <ol>
+              <li>Copia el {metodoPago === 'CVU_ARS' ? 'CVU' : 'address'} de arriba</li>
+              <li>Realiza la transferencia por <strong>{getMoneda() === 'ARS' ? `$${getPrecio().toLocaleString('es-AR')} ARS` : `$${getPrecio()} USDT`}</strong></li>
+              <li>Toma una captura del comprobante</li>
+              <li>Envianos el comprobante por WhatsApp con el boton de abajo</li>
+            </ol>
           </div>
+
+          {/* Boton WhatsApp */}
+          <button className="upgrade-wpp-btn" onClick={enviarWhatsApp}>
+            <FiMessageCircle /> Enviar comprobante por WhatsApp
+          </button>
+
+          <p className="upgrade-contacto">
+            Tambien podes escribirnos a <strong>gastronomicapp@gmail.com</strong>
+          </p>
         </motion.div>
       )}
 

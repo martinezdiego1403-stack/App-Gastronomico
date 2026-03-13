@@ -135,6 +135,30 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<ApiDbContext>();
     db.Database.EnsureCreated();
 
+    // Crear tabla SolicitudesPago si no existe (EnsureCreated no agrega tablas nuevas)
+    try
+    {
+        db.Database.ExecuteSqlRaw(@"
+            CREATE TABLE IF NOT EXISTS ""SolicitudesPago"" (
+                ""SolicitudPagoID"" SERIAL PRIMARY KEY,
+                ""TenantId"" VARCHAR(50) NOT NULL,
+                ""PlanSolicitado"" VARCHAR(20) NOT NULL,
+                ""MetodoPago"" VARCHAR(20) NOT NULL,
+                ""ReferenciaTransferencia"" VARCHAR(100),
+                ""MontoDeclarado"" DECIMAL NOT NULL DEFAULT 0,
+                ""MonedaPago"" VARCHAR(10) NOT NULL DEFAULT 'ARS',
+                ""ComprobanteBase64"" TEXT,
+                ""ComprobanteFormato"" VARCHAR(10),
+                ""Estado"" VARCHAR(20) NOT NULL DEFAULT 'Pendiente',
+                ""MotivoRechazo"" VARCHAR(500),
+                ""FechaSolicitud"" TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT NOW(),
+                ""FechaResolucion"" TIMESTAMP WITHOUT TIME ZONE,
+                ""ResueltoPorUsuarioID"" INTEGER
+            )");
+        Console.WriteLine("  [DB] Tabla SolicitudesPago verificada");
+    }
+    catch (Exception ex) { Console.WriteLine($"  [DB] SolicitudesPago: {ex.Message}"); }
+
     // Seed: crear SuperAdmin si no existe
     if (!db.Usuarios.IgnoreQueryFilters().Any(u => u.Rol == "SuperAdmin"))
     {

@@ -3328,6 +3328,52 @@ select:focus { border-color: var(--accent-primary); }
   font-size: 1rem;
 }
 
+.upgrade-instrucciones {
+  margin: 1.5rem 0;
+}
+
+.upgrade-instrucciones h3 {
+  font-size: 1rem;
+  margin-bottom: 0.7rem;
+}
+
+.upgrade-instrucciones ol {
+  padding-left: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  color: #555;
+}
+
+.upgrade-wpp-btn {
+  width: 100%;
+  padding: 1rem;
+  background: #25D366;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: background 0.2s;
+}
+
+.upgrade-wpp-btn:hover {
+  background: #1da851;
+}
+
+.upgrade-contacto {
+  text-align: center;
+  margin-top: 1rem;
+  font-size: 0.85rem;
+  color: #888;
+}
+
 .upgrade-historial {
   margin-top: 2.5rem;
 }
