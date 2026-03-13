@@ -181,6 +181,31 @@ using (var scope = app.Services.CreateScope())
     db.SaveChanges();
 }
 
+// Middleware global de excepciones (ANTES de CORS para que los headers se preserven)
+app.Use(async (context, next) =>
+{
+    try
+    {
+        await next();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"[ERROR GLOBAL] {context.Request.Path}: {ex.Message}");
+        Console.WriteLine($"[STACKTRACE] {ex.StackTrace}");
+        if (ex.InnerException != null)
+            Console.WriteLine($"[INNER] {ex.InnerException.Message}");
+
+        context.Response.StatusCode = 500;
+        context.Response.ContentType = "application/json";
+        await context.Response.WriteAsJsonAsync(new
+        {
+            error = ex.Message,
+            inner = ex.InnerException?.Message,
+            path = context.Request.Path.Value
+        });
+    }
+});
+
 // Swagger (siempre habilitado por ahora)
 app.UseSwagger();
 app.UseSwaggerUI(c =>

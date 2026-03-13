@@ -24,6 +24,15 @@ namespace SandwicheriaWalterio.Api.Controllers
         }
 
         /// <summary>
+        /// GET /api/superadmin/ping - Diagnóstico sin BD
+        /// </summary>
+        [HttpGet("ping")]
+        public IActionResult Ping()
+        {
+            return Ok(new { ok = true, timestamp = DateTime.UtcNow, version = "2.1-diag" });
+        }
+
+        /// <summary>
         /// GET /api/superadmin/dashboard - Estadísticas generales de la plataforma
         /// </summary>
         [HttpGet("dashboard")]
