@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { usuariosService } from '../services/api';
 import { motion } from 'framer-motion';
-import { FiUsers, FiPlus, FiEdit2, FiLock, FiUnlock, FiRefreshCw } from 'react-icons/fi';
+import { FiUsers, FiPlus, FiEdit2, FiLock, FiUnlock, FiRefreshCw, FiEye, FiEyeOff } from 'react-icons/fi';
 
 interface Usuario {
   usuarioID: number;
@@ -20,6 +20,7 @@ export default function Usuarios() {
   const [showForm, setShowForm] = useState(false);
   const [editando, setEditando] = useState<Usuario | null>(null);
   const [form, setForm] = useState({ nombreUsuario: '', nombreCompleto: '', email: '', rol: 'Empleado', contrasena: '' });
+  const [showPass, setShowPass] = useState(false);
 
   useEffect(() => { cargar(); }, []);
 
@@ -195,7 +196,12 @@ export default function Usuarios() {
               </div>
               <div className="form-group">
                 <label>{editando ? 'Nueva Contrasena (dejar vacio para no cambiar)' : 'Contrasena'}</label>
-                <input type="password" value={form.contrasena} onChange={e => setForm({ ...form, contrasena: e.target.value })} />
+                <div className="input-group">
+                  <input type={showPass ? 'text' : 'password'} value={form.contrasena} onChange={e => setForm({ ...form, contrasena: e.target.value })} />
+                  <button type="button" className="input-toggle-pass" onClick={() => setShowPass(!showPass)} tabIndex={-1}>
+                    {showPass ? <FiEyeOff /> : <FiEye />}
+                  </button>
+                </div>
               </div>
             </div>
             <div className="modal-actions">

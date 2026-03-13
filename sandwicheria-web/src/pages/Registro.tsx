@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { authService } from '../services/api';
 import { motion } from 'framer-motion';
-import { FiUser, FiLock, FiMail, FiPhone, FiHome, FiArrowRight, FiSun, FiMoon } from 'react-icons/fi';
+import { FiUser, FiLock, FiMail, FiPhone, FiHome, FiArrowRight, FiSun, FiMoon, FiEye, FiEyeOff } from 'react-icons/fi';
 import { useTheme } from '../context/ThemeContext';
 
 export default function Registro() {
@@ -16,6 +16,8 @@ export default function Registro() {
     nombreNegocio: '',
     telefono: '',
   });
+  const [showPass, setShowPass] = useState(false);
+  const [showPassConfirm, setShowPassConfirm] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { loginWithToken } = useAuth();
@@ -158,21 +160,27 @@ export default function Registro() {
           <div className="input-group">
             <FiLock className="input-icon" />
             <input
-              type="password"
-              placeholder="Contraseña *"
+              type={showPass ? 'text' : 'password'}
+              placeholder="Contrasena *"
               value={form.contrasena}
               onChange={e => handleChange('contrasena', e.target.value)}
             />
+            <button type="button" className="input-toggle-pass" onClick={() => setShowPass(!showPass)} tabIndex={-1}>
+              {showPass ? <FiEyeOff /> : <FiEye />}
+            </button>
           </div>
 
           <div className="input-group">
             <FiLock className="input-icon" />
             <input
-              type="password"
-              placeholder="Confirmar contraseña *"
+              type={showPassConfirm ? 'text' : 'password'}
+              placeholder="Confirmar contrasena *"
               value={form.confirmarContrasena}
               onChange={e => handleChange('confirmarContrasena', e.target.value)}
             />
+            <button type="button" className="input-toggle-pass" onClick={() => setShowPassConfirm(!showPassConfirm)} tabIndex={-1}>
+              {showPassConfirm ? <FiEyeOff /> : <FiEye />}
+            </button>
           </div>
 
           {error && (

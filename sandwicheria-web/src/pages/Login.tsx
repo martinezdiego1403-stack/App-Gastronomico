@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { authService } from '../services/api';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiUser, FiLock, FiLogIn, FiSun, FiMoon, FiHome, FiArrowLeft } from 'react-icons/fi';
+import { FiUser, FiLock, FiLogIn, FiSun, FiMoon, FiHome, FiArrowLeft, FiEye, FiEyeOff } from 'react-icons/fi';
 import { useTheme } from '../context/ThemeContext';
 
 type TipoUsuario = null | 'dueno' | 'empleado';
@@ -14,6 +14,8 @@ export default function Login() {
   const [nombreUsuario, setNombreUsuario] = useState('');
   const [contrasena, setContrasena] = useState('');
   const [contrasenaLocal, setContrasenaLocal] = useState('');
+  const [showPass, setShowPass] = useState(false);
+  const [showPassLocal, setShowPassLocal] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { login, loginWithToken } = useAuth();
@@ -159,11 +161,14 @@ export default function Login() {
                 <div className="input-group">
                   <FiLock className="input-icon" />
                   <input
-                    type="password"
+                    type={showPass ? 'text' : 'password'}
                     placeholder="Contrasena"
                     value={contrasena}
                     onChange={e => setContrasena(e.target.value)}
                   />
+                  <button type="button" className="input-toggle-pass" onClick={() => setShowPass(!showPass)} tabIndex={-1}>
+                    {showPass ? <FiEyeOff /> : <FiEye />}
+                  </button>
                 </div>
 
                 {error && (
@@ -220,11 +225,14 @@ export default function Login() {
                 <div className="input-group">
                   <FiLock className="input-icon" />
                   <input
-                    type="password"
+                    type={showPassLocal ? 'text' : 'password'}
                     placeholder="Clave del local (planes Pro)"
                     value={contrasenaLocal}
                     onChange={e => setContrasenaLocal(e.target.value)}
                   />
+                  <button type="button" className="input-toggle-pass" onClick={() => setShowPassLocal(!showPassLocal)} tabIndex={-1}>
+                    {showPassLocal ? <FiEyeOff /> : <FiEye />}
+                  </button>
                 </div>
                 <p className="login-hint">Solo requerida en planes Pro y Pro+</p>
 
