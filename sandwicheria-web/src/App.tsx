@@ -16,6 +16,7 @@ import Usuarios from './pages/Usuarios';
 import Configuracion from './pages/Configuracion';
 import MiNegocio from './pages/MiNegocio';
 import SuperAdminDashboard from './pages/SuperAdminDashboard';
+import Upgrade from './pages/Upgrade';
 import './App.css';
 
 function PrivateRoute({ children }: { children: React.ReactElement }) {
@@ -54,6 +55,7 @@ function AppRoutes() {
         <Route path="usuarios" element={<Usuarios />} />
         <Route path="configuracion" element={<Configuracion />} />
         <Route path="mi-negocio" element={<MiNegocio />} />
+        <Route path="upgrade" element={<Upgrade />} />
 
         {/* Rutas SuperAdmin */}
         <Route path="admin/dashboard" element={

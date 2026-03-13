@@ -188,6 +188,23 @@ export const superAdminService = {
     api.put(`/superadmin/tenants/${tenantId}/activar?activo=${activo}`),
   cambiarPlan: (tenantId: string, plan: string) =>
     api.put(`/superadmin/tenants/${tenantId}/plan`, { plan }),
+  solicitudesPago: (estado?: string) =>
+    api.get(`/superadmin/solicitudes-pago${estado ? `?estado=${estado}` : ''}`),
+  obtenerSolicitud: (id: number) => api.get(`/superadmin/solicitudes-pago/${id}`),
+  aprobarSolicitud: (id: number) => api.put(`/superadmin/solicitudes-pago/${id}/aprobar`),
+  rechazarSolicitud: (id: number, motivo: string) =>
+    api.put(`/superadmin/solicitudes-pago/${id}/rechazar`, { motivoRechazo: motivo }),
+};
+
+// ============================================
+// PAGOS (Upgrade de plan)
+// ============================================
+export const pagosService = {
+  obtenerInfo: () => api.get('/pagos/info'),
+  solicitar: (formData: FormData) => api.post('/pagos/solicitar', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
+  misSolicitudes: () => api.get('/pagos/mis-solicitudes'),
 };
 
 export default api;

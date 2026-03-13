@@ -33,6 +33,7 @@ namespace SandwicheriaWalterio.Api.Data
         public DbSet<IngredienteReceta> IngredientesReceta { get; set; }
         public DbSet<ConfiguracionTenant> Configuraciones { get; set; }
         public DbSet<Tenant> Tenants { get; set; }
+        public DbSet<SolicitudPago> SolicitudesPago { get; set; }
 
         // ============================================
         // CONFIGURACIÓN DE MODELOS
@@ -79,6 +80,13 @@ namespace SandwicheriaWalterio.Api.Data
             modelBuilder.Entity<Tenant>(entity =>
             {
                 entity.HasIndex(t => t.TenantId).IsUnique();
+            });
+
+            // SolicitudPago (tabla de plataforma, SIN query filter)
+            modelBuilder.Entity<SolicitudPago>(entity =>
+            {
+                entity.HasIndex(s => s.TenantId);
+                entity.HasIndex(s => s.Estado);
             });
 
             // ============================================

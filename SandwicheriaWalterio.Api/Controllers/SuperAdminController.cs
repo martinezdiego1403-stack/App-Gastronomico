@@ -101,6 +101,7 @@ namespace SandwicheriaWalterio.Api.Controllers
                     totalUsuarios,
                     registrosHoy = hoy,
                     registrosEstaSemana = semana,
+                    solicitudesPendientes = _db.SolicitudesPago.Count(s => s.Estado == "Pendiente"),
                     tenants = tenantsList
                 });
             }
@@ -227,10 +228,167 @@ namespace SandwicheriaWalterio.Api.Controllers
 
             return Ok(new { mensaje = $"Plan cambiado a {request.Plan}" });
         }
+
+        // ============================================
+        // SOLICITUDES DE PAGO
+        // ============================================
+
+        /// <summary>
+        /// GET /api/superadmin/solicitudes-pago - Lista solicitudes de pago
+        /// </summary>
+        [HttpGet("solicitudes-pago")]
+        public IActionResult ListarSolicitudes([FromQuery] string? estado)
+        {
+            var query = _db.SolicitudesPago.AsNoTracking().AsQueryable();
+
+            if (!string.IsNullOrEmpty(estado))
+                query = query.Where(s => s.Estado == estado);
+
+            var solicitudes = query
+                .OrderByDescending(s => s.FechaSolicitud)
+                .Select(s => new
+                {
+                    s.SolicitudPagoID,
+                    s.TenantId,
+                    s.PlanSolicitado,
+                    s.MetodoPago,
+                    s.MontoDeclarado,
+                    s.MonedaPago,
+                    s.ReferenciaTransferencia,
+                    s.Estado,
+                    s.MotivoRechazo,
+                    s.FechaSolicitud,
+                    s.FechaResolucion
+                })
+                .ToList();
+
+            // Agregar nombre del negocio
+            var tenantIds = solicitudes.Select(s => s.TenantId).Distinct().ToList();
+            var tenantNames = _db.Tenants.AsNoTracking()
+                .Where(t => tenantIds.Contains(t.TenantId))
+                .Select(t => new { t.TenantId, t.NombreNegocio })
+                .ToDictionary(t => t.TenantId, t => t.NombreNegocio);
+
+            var result = solicitudes.Select(s => new
+            {
+                s.SolicitudPagoID,
+                s.TenantId,
+                nombreNegocio = tenantNames.GetValueOrDefault(s.TenantId, "Desconocido"),
+                s.PlanSolicitado,
+                s.MetodoPago,
+                s.MontoDeclarado,
+                s.MonedaPago,
+                s.ReferenciaTransferencia,
+                s.Estado,
+                s.MotivoRechazo,
+                s.FechaSolicitud,
+                s.FechaResolucion
+            });
+
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// GET /api/superadmin/solicitudes-pago/{id} - Detalle con comprobante
+        /// </summary>
+        [HttpGet("solicitudes-pago/{id}")]
+        public IActionResult ObtenerSolicitud(int id)
+        {
+            var s = _db.SolicitudesPago.AsNoTracking()
+                .FirstOrDefault(x => x.SolicitudPagoID == id);
+
+            if (s == null)
+                return NotFound(new { error = "Solicitud no encontrada" });
+
+            var tenantName = _db.Tenants.AsNoTracking()
+                .Where(t => t.TenantId == s.TenantId)
+                .Select(t => t.NombreNegocio)
+                .FirstOrDefault() ?? "Desconocido";
+
+            return Ok(new
+            {
+                s.SolicitudPagoID,
+                s.TenantId,
+                nombreNegocio = tenantName,
+                s.PlanSolicitado,
+                s.MetodoPago,
+                s.MontoDeclarado,
+                s.MonedaPago,
+                s.ReferenciaTransferencia,
+                s.Estado,
+                s.MotivoRechazo,
+                s.FechaSolicitud,
+                s.FechaResolucion,
+                comprobante = s.ComprobanteBase64 != null
+                    ? $"data:image/{s.ComprobanteFormato};base64,{s.ComprobanteBase64}"
+                    : null
+            });
+        }
+
+        /// <summary>
+        /// PUT /api/superadmin/solicitudes-pago/{id}/aprobar
+        /// </summary>
+        [HttpPut("solicitudes-pago/{id}/aprobar")]
+        public IActionResult AprobarSolicitud(int id)
+        {
+            var solicitud = _db.SolicitudesPago.FirstOrDefault(s => s.SolicitudPagoID == id);
+            if (solicitud == null)
+                return NotFound(new { error = "Solicitud no encontrada" });
+
+            if (solicitud.Estado != "Pendiente")
+                return BadRequest(new { error = $"La solicitud ya fue {solicitud.Estado.ToLower()}" });
+
+            // Upgrade del plan del tenant
+            var tenant = _db.Tenants.FirstOrDefault(t => t.TenantId == solicitud.TenantId);
+            if (tenant == null)
+                return NotFound(new { error = "Tenant no encontrado" });
+
+            tenant.Plan = solicitud.PlanSolicitado;
+            tenant.FechaExpiracionTrial = null; // Quitar expiracion trial
+
+            // Marcar solicitud como aprobada
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+            solicitud.Estado = "Aprobada";
+            solicitud.FechaResolucion = DateTime.UtcNow;
+            solicitud.ResueltoPorUsuarioID = userIdClaim != null ? int.Parse(userIdClaim.Value) : null;
+
+            _db.SaveChangesWithoutFilters();
+
+            return Ok(new { mensaje = $"Solicitud aprobada. {tenant.NombreNegocio} ahora tiene plan {solicitud.PlanSolicitado}" });
+        }
+
+        /// <summary>
+        /// PUT /api/superadmin/solicitudes-pago/{id}/rechazar
+        /// </summary>
+        [HttpPut("solicitudes-pago/{id}/rechazar")]
+        public IActionResult RechazarSolicitud(int id, [FromBody] RechazoRequest request)
+        {
+            var solicitud = _db.SolicitudesPago.FirstOrDefault(s => s.SolicitudPagoID == id);
+            if (solicitud == null)
+                return NotFound(new { error = "Solicitud no encontrada" });
+
+            if (solicitud.Estado != "Pendiente")
+                return BadRequest(new { error = $"La solicitud ya fue {solicitud.Estado.ToLower()}" });
+
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+            solicitud.Estado = "Rechazada";
+            solicitud.MotivoRechazo = request.MotivoRechazo;
+            solicitud.FechaResolucion = DateTime.UtcNow;
+            solicitud.ResueltoPorUsuarioID = userIdClaim != null ? int.Parse(userIdClaim.Value) : null;
+
+            _db.SaveChangesWithoutFilters();
+
+            return Ok(new { mensaje = "Solicitud rechazada" });
+        }
     }
 
     public class CambiarPlanRequest
     {
         public string Plan { get; set; } = "Trial";
+    }
+
+    public class RechazoRequest
+    {
+        public string MotivoRechazo { get; set; } = string.Empty;
     }
 }

@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import {
   FiShoppingCart, FiGrid, FiPackage, FiBookOpen,
   FiBarChart2, FiUsers, FiLogOut, FiDollarSign, FiSettings,
-  FiHome, FiActivity,
+  FiHome, FiActivity, FiArrowUpCircle,
 } from 'react-icons/fi';
 
 interface NavItem {
@@ -24,6 +24,7 @@ const navItems: NavItem[] = [
   { to: '/app/usuarios', icon: <FiUsers />, label: 'Usuarios', rolesPermitidos: ['Dueño', 'Dueno'] },
   { to: '/app/mi-negocio', icon: <FiHome />, label: 'Mi Negocio', rolesPermitidos: ['Dueño', 'Dueno'] },
   { to: '/app/configuracion', icon: <FiSettings />, label: 'Configuracion', rolesPermitidos: ['Dueño', 'Dueno', 'Administrador'] },
+  { to: '/app/upgrade', icon: <FiArrowUpCircle />, label: 'Upgrade Plan', rolesPermitidos: ['Dueño', 'Dueno'] },
 ];
 
 const superAdminNavItems: NavItem[] = [

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { superAdminService } from '../services/api';
-import { FiUsers, FiActivity, FiClock, FiTrendingUp, FiToggleLeft, FiToggleRight, FiEye } from 'react-icons/fi';
+import { FiUsers, FiActivity, FiClock, FiTrendingUp, FiToggleLeft, FiToggleRight, FiEye, FiDollarSign, FiCheckCircle, FiXCircle, FiImage } from 'react-icons/fi';
 
 interface TenantRow {
   tenantID: number;
@@ -28,7 +28,23 @@ interface DashboardData {
   totalUsuarios: number;
   registrosHoy: number;
   registrosEstaSemana: number;
+  solicitudesPendientes: number;
   tenants: TenantRow[];
+}
+
+interface SolicitudRow {
+  solicitudPagoID: number;
+  tenantId: string;
+  nombreNegocio: string;
+  planSolicitado: string;
+  metodoPago: string;
+  montoDeclarado: number;
+  monedaPago: string;
+  referenciaTransferencia: string | null;
+  estado: string;
+  motivoRechazo: string | null;
+  fechaSolicitud: string;
+  fechaResolucion: string | null;
 }
 
 export default function SuperAdminDashboard() {
@@ -36,14 +52,23 @@ export default function SuperAdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [detalle, setDetalle] = useState<any>(null);
+  const [solicitudes, setSolicitudes] = useState<SolicitudRow[]>([]);
+  const [filtroSol, setFiltroSol] = useState('Pendiente');
+  const [solDetalle, setSolDetalle] = useState<any>(null);
+  const [motivoRechazo, setMotivoRechazo] = useState('');
+  const [tab, setTab] = useState<'negocios' | 'solicitudes'>('negocios');
 
   useEffect(() => {
     cargarDatos();
+    cargarSolicitudes();
   }, []);
+
+  useEffect(() => {
+    cargarSolicitudes();
+  }, [filtroSol]);
 
   const cargarDatos = async () => {
     try {
-      // Todo viene de /dashboard en una sola llamada
       const res = await superAdminService.dashboard();
       setData(res.data);
       setError('');
@@ -52,6 +77,52 @@ export default function SuperAdminDashboard() {
       setError('Error al cargar datos: ' + (err.message || 'Error desconocido'));
     } finally {
       setLoading(false);
+    }
+  };
+
+  const cargarSolicitudes = async () => {
+    try {
+      const res = await superAdminService.solicitudesPago(filtroSol || undefined);
+      setSolicitudes(res.data);
+    } catch (err) {
+      console.error('Error cargando solicitudes', err);
+    }
+  };
+
+  const verComprobante = async (id: number) => {
+    try {
+      const res = await superAdminService.obtenerSolicitud(id);
+      setSolDetalle(res.data);
+      setMotivoRechazo('');
+    } catch (err) {
+      console.error('Error cargando solicitud', err);
+    }
+  };
+
+  const aprobar = async (id: number) => {
+    if (!confirm('Aprobar esta solicitud? El plan se actualizara automaticamente.')) return;
+    try {
+      await superAdminService.aprobarSolicitud(id);
+      setSolDetalle(null);
+      cargarSolicitudes();
+      cargarDatos();
+    } catch (err) {
+      console.error('Error aprobando', err);
+    }
+  };
+
+  const rechazar = async (id: number) => {
+    if (!motivoRechazo.trim()) {
+      alert('Ingresa un motivo de rechazo');
+      return;
+    }
+    try {
+      await superAdminService.rechazarSolicitud(id, motivoRechazo);
+      setSolDetalle(null);
+      cargarSolicitudes();
+      cargarDatos();
+    } catch (err) {
+      console.error('Error rechazando', err);
     }
   };
 
@@ -137,8 +208,21 @@ export default function SuperAdminDashboard() {
         </div>
       )}
 
+      {/* Tabs */}
+      <div className="sa-tabs">
+        <button className={`sa-tab ${tab === 'negocios' ? 'active' : ''}`} onClick={() => setTab('negocios')}>
+          <FiUsers /> Negocios ({data?.tenants?.length || 0})
+        </button>
+        <button className={`sa-tab ${tab === 'solicitudes' ? 'active' : ''}`} onClick={() => setTab('solicitudes')}>
+          <FiDollarSign /> Solicitudes de Pago
+          {(data?.solicitudesPendientes || 0) > 0 && (
+            <span className="sa-badge">{data?.solicitudesPendientes}</span>
+          )}
+        </button>
+      </div>
+
       {/* Tenants Table */}
-      <div className="table-card">
+      {tab === 'negocios' && <div className="table-card">
         <h3>Negocios registrados ({data?.tenants?.length || 0})</h3>
         <div className="table-responsive">
           <table className="data-table">
@@ -202,7 +286,110 @@ export default function SuperAdminDashboard() {
             </tbody>
           </table>
         </div>
-      </div>
+      </div>}
+
+      {/* Solicitudes de Pago */}
+      {tab === 'solicitudes' && (
+        <div className="table-card">
+          <div className="sa-sol-filters">
+            {['Pendiente', 'Aprobada', 'Rechazada', ''].map(f => (
+              <button
+                key={f || 'todas'}
+                className={`sa-filter-btn ${filtroSol === f ? 'active' : ''}`}
+                onClick={() => setFiltroSol(f)}
+              >
+                {f || 'Todas'}
+              </button>
+            ))}
+          </div>
+          <div className="table-responsive">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Negocio</th>
+                  <th>Plan</th>
+                  <th>Monto</th>
+                  <th>Metodo</th>
+                  <th>Estado</th>
+                  <th>Fecha</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {solicitudes.map(s => (
+                  <tr key={s.solicitudPagoID}>
+                    <td>{s.nombreNegocio}</td>
+                    <td>{s.planSolicitado}</td>
+                    <td>{s.monedaPago === 'ARS' ? `$${s.montoDeclarado.toLocaleString('es-AR')}` : `$${s.montoDeclarado} USDT`}</td>
+                    <td>{s.metodoPago === 'CVU_ARS' ? 'CVU/ARS' : s.metodoPago.replace('USDT_', 'USDT ')}</td>
+                    <td>
+                      <span className={`badge ${s.estado === 'Pendiente' ? 'badge-orange' : s.estado === 'Aprobada' ? 'badge-green' : 'badge-red'}`}>
+                        {s.estado}
+                      </span>
+                    </td>
+                    <td>{new Date(s.fechaSolicitud).toLocaleDateString('es-AR')}</td>
+                    <td>
+                      <button className="btn-icon" onClick={() => verComprobante(s.solicitudPagoID)} title="Ver comprobante">
+                        <FiImage />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+                {solicitudes.length === 0 && (
+                  <tr><td colSpan={7} style={{ textAlign: 'center', padding: '2rem', opacity: 0.5 }}>No hay solicitudes</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Solicitud Detail Modal */}
+      {solDetalle && (
+        <div className="modal-overlay" onClick={() => setSolDetalle(null)}>
+          <div className="modal-content sa-sol-modal" onClick={e => e.stopPropagation()}>
+            <h3>Solicitud de {solDetalle.nombreNegocio}</h3>
+            <div className="detail-grid">
+              <div><strong>Plan solicitado:</strong> {solDetalle.planSolicitado}</div>
+              <div><strong>Metodo:</strong> {solDetalle.metodoPago === 'CVU_ARS' ? 'CVU/ARS' : solDetalle.metodoPago.replace('USDT_', 'USDT ')}</div>
+              <div><strong>Monto:</strong> {solDetalle.monedaPago === 'ARS' ? `$${solDetalle.montoDeclarado.toLocaleString('es-AR')} ARS` : `$${solDetalle.montoDeclarado} USDT`}</div>
+              <div><strong>Referencia:</strong> {solDetalle.referenciaTransferencia || '-'}</div>
+              <div><strong>Estado:</strong> {solDetalle.estado}</div>
+              <div><strong>Fecha:</strong> {new Date(solDetalle.fechaSolicitud).toLocaleString('es-AR')}</div>
+            </div>
+
+            {solDetalle.comprobante && (
+              <div className="sa-comprobante">
+                <h4>Comprobante:</h4>
+                <img src={solDetalle.comprobante} alt="Comprobante de pago" />
+              </div>
+            )}
+
+            {solDetalle.estado === 'Pendiente' && (
+              <div className="sa-sol-actions">
+                <button className="btn btn-success" onClick={() => aprobar(solDetalle.solicitudPagoID)}>
+                  <FiCheckCircle /> Aprobar
+                </button>
+                <div className="sa-rechazo">
+                  <input
+                    type="text"
+                    placeholder="Motivo de rechazo..."
+                    value={motivoRechazo}
+                    onChange={e => setMotivoRechazo(e.target.value)}
+                  />
+                  <button className="btn btn-danger" onClick={() => rechazar(solDetalle.solicitudPagoID)}>
+                    <FiXCircle /> Rechazar
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <button className="btn-primary" onClick={() => setSolDetalle(null)} style={{ marginTop: '1rem' }}>
+              Cerrar
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Detail Modal */}
       {detalle && (
