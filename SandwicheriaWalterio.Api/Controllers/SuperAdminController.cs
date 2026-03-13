@@ -47,7 +47,7 @@ namespace SandwicheriaWalterio.Api.Controllers
                     .OrderByDescending(t => t.FechaCreacion)
                     .Select(t => new
                     {
-                        t.TenantID,
+                        Id = t.TenantID,
                         t.TenantId,
                         t.NombreNegocio,
                         t.Plan,
@@ -78,7 +78,7 @@ namespace SandwicheriaWalterio.Api.Controllers
 
                     tenantsList.Add(new
                     {
-                        tenantID = t.TenantID,
+                        id = t.Id,
                         tenantId = t.TenantId,
                         nombreNegocio = t.NombreNegocio,
                         plan = t.Plan,
@@ -134,7 +134,7 @@ namespace SandwicheriaWalterio.Api.Controllers
                 .Where(t => t.TenantId == tenantId)
                 .Select(t => new
                 {
-                    t.TenantID,
+                    Id = t.TenantID,
                     t.TenantId,
                     t.NombreNegocio,
                     t.Plan,
@@ -171,7 +171,7 @@ namespace SandwicheriaWalterio.Api.Controllers
             {
                 tenant = new
                 {
-                    tenant.TenantID,
+                    tenant.Id,
                     tenant.TenantId,
                     tenant.NombreNegocio,
                     tenant.Plan,
