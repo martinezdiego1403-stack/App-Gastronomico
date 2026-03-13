@@ -100,7 +100,7 @@ export default function SuperAdminDashboard() {
   };
 
   const aprobar = async (id: number) => {
-    if (!confirm('Aprobar esta solicitud? El plan se actualizara automaticamente.')) return;
+    if (!window.confirm('Aprobar esta solicitud? El plan se actualizara automaticamente.')) return;
     try {
       await superAdminService.aprobarSolicitud(id);
       setSolDetalle(null);
