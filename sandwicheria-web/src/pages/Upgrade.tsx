@@ -37,7 +37,7 @@ interface Solicitud {
 type MetodoPago = 'CVU_ARS' | 'USDT_BEP20' | 'USDT_TRC20';
 
 // Numero de WhatsApp de soporte (sin +)
-const WPP_NUMERO = '5491112345678'; // TODO: reemplazar con tu numero real
+const WPP_NUMERO = '5493886036522';
 
 export default function Upgrade() {
   const [info, setInfo] = useState<PagoInfo | null>(null);
